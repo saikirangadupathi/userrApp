@@ -294,36 +294,6 @@ const CountdownTimer = styled.div`
 
 const HomeContent = ({ categories, searchQuery, setSearchQuery, suggestions, handleSuggestionClick, handleSearch, selectedCategory, setSelectedCategory }) => {
 
-      const getImageForCategory = (category) => {
-
-    switch (category.toLowerCase()) {
-        case 'BathroomEssentials':
-            return 'https://gadupathi.s3.ap-south-1.amazonaws.com/BathroomEssentials.jpg';
-        case 'Beauty':
-            return 'https://gadupathi.s3.ap-south-1.amazonaws.com/Beauty.jpg';
-        case 'Cleaning':
-            return 'https://gadupathi.s3.ap-south-1.amazonaws.com/Cleaning.jpg';
-        case 'Electronics':
-            return 'https://gadupathi.s3.ap-south-1.amazonaws.com/Electronics.jpg';
-        case 'Fashion':
-            return 'https://gadupathi.s3.ap-south-1.amazonaws.com/Fashion.jpg';
-        case 'Home':
-            return 'https://gadupathi.s3.ap-south-1.amazonaws.com/Home.jpg';
-        case 'HomeLiving':
-            return 'https://gadupathi.s3.ap-south-1.amazonaws.com/HomeLiving.jpg';
-        case 'Kitchenware':
-            return 'https://gadupathi.s3.ap-south-1.amazonaws.com/Kitchenware.jpg';
-        case 'PersonelCare':
-            return 'https://gadupathi.s3.ap-south-1.amazonaws.com/PersonelCare.jpg';
-        case 'Stationery':
-            return 'https://gadupathi.s3.ap-south-1.amazonaws.com/Stationery.jpg';
-        default:
-            // Return a fallback image or default image if the category doesn't match any case
-            return 'https://example.com/default.jpg';
-    }
-};
-    
-
   return (
     <HeroSectionContainer>
       <HomeCardCarousel />
@@ -334,7 +304,7 @@ const HomeContent = ({ categories, searchQuery, setSearchQuery, suggestions, han
             key={index}
             active={selectedCategory === category}
             onClick={() => setSelectedCategory(category)}
-            $bgImage={getImageForCategory(category)}
+            $bgImage={`https://gadupathi.s3.ap-south-1.amazonaws.com/images/${category.toLowerCase()}.jpg`}
             >
             <span style={{backgroundColor: 'whitesmoke',padding: '1.5vw',borderRadius:'10px'}}>{category}</span>
             </CategoryItem>
