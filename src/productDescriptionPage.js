@@ -539,7 +539,6 @@ const ProductDescriptionPage = () => {
         return [...prevCart, { ...item, quantity: 1 }];
       }
     });
-    handleSaveCart(cart);
   };
 
   const removeFromCart = (item) => {
@@ -553,7 +552,6 @@ const ProductDescriptionPage = () => {
         return prevCart.filter((cartItem) => cartItem.name !== item.name);
       }
     });
-    handleSaveCart(cart);
   };
 
   const getTotalPrice = () => {
