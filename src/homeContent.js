@@ -319,26 +319,13 @@ const HomeContent = ({ categories, searchQuery, setSearchQuery, suggestions, han
   return (
     <HeroSectionContainer>
       <HomeCardCarousel /> {/* Use the new HomeCardCarousel component */}
-      {/* Category Showcase */}
-    // <CategoryGrid>
-    //     {categories.map((category, index) => (
-    //         <CategoryItem
-    //         key={index}
-    //         active={selectedCategory === category}
-    //         onClick={() => setSelectedCategory(category)}
-    //         $bgImage={`${process.env.PUBLIC_URL}/images/${category.toLowerCase()}.jpg`}  // Use process.env.PUBLIC_URL for assets in public folder
-    //         >
-    //         <span style={{backgroundColor: 'whitesmoke',padding: '1.5vw',borderRadius:'10px'}}>{category}</span>
-    //         </CategoryItem>
-    //     ))}
-    // </CategoryGrid>
 
 
    <CategoryItem
             key={index}
             active={selectedCategory === category}
             onClick={() => setSelectedCategory(category)}
-            $bgImage={`./carouselImages/${category.toLowerCase()}.jpg`} // Directly reference from the public folder
+            $bgImage={`/images/${category.toLowerCase()}.jpg`} // Directly reference from the public folder
         >
             <span style={{ backgroundColor: 'whitesmoke', padding: '1.5vw', borderRadius: '10px' }}>
                 {category}
