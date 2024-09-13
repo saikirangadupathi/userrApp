@@ -338,7 +338,7 @@ const HomeContent = ({ categories, searchQuery, setSearchQuery, suggestions, han
             key={index}
             active={selectedCategory === category}
             onClick={() => setSelectedCategory(category)}
-            $bgImage={`/images/${category.toLowerCase()}.jpg`} // Directly reference from the public folder
+            $bgImage={`./images/${category.toLowerCase()}.jpg`} // Directly reference from the public folder
         >
             <span style={{ backgroundColor: 'whitesmoke', padding: '1.5vw', borderRadius: '10px' }}>
                 {category}
