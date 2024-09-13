@@ -304,7 +304,7 @@ const HomeContent = ({ categories, searchQuery, setSearchQuery, suggestions, han
             key={index}
             active={selectedCategory === category}
             onClick={() => setSelectedCategory(category)}
-            $bgImage={`https://gadupathi.s3.ap-south-1.amazonaws.com/images/${category.toLowerCase()}.jpg`}
+            $bgImage={`https://gadupathi.s3.ap-south-1.amazonaws.com/${category}.jpg`}
             >
             <span style={{backgroundColor: 'whitesmoke',padding: '1.5vw',borderRadius:'10px'}}>{category}</span>
             </CategoryItem>
