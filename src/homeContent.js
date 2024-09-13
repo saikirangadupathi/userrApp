@@ -318,7 +318,7 @@ const HomeContent = ({ categories, searchQuery, setSearchQuery, suggestions, han
 
   return (
     <HeroSectionContainer>
-      <HomeCardCarousel /> {/* Use the new HomeCardCarousel component */}
+      <HomeCardCarousel />
 
 
    <CategoryItem
