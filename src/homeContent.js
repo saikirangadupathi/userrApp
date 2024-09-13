@@ -294,28 +294,35 @@ const CountdownTimer = styled.div`
 
 const HomeContent = ({ categories, searchQuery, setSearchQuery, suggestions, handleSuggestionClick, handleSearch, selectedCategory, setSelectedCategory }) => {
 
-    const carouselItems = [
-        {
-          id: 1,
-          title: 'Eco-Friendly Gadgets',
-          description: 'Upgrade your home with sustainable technology.',
-          $bgImage: `${process.env.PUBLIC_URL}/images/Balcony.jpg`,
-        },
-        {
-          id: 2,
-          title: 'Sustainable Furniture',
-          description: 'Elegant designs with minimal environmental impact.',
-          $bgImage: `${process.env.PUBLIC_URL}/images/kitchen.jpg`,
-        },
-        {
-          id: 3,
-          title: 'Essential Eco Goods',
-          description: 'Daily essentials that are good for the planet.',
-          $bgImage: `${process.env.PUBLIC_URL}/images/washroom.jpg`,
-        },
-      ];
-      
-    console.log("process.env.PUBLIC_URL",process.env.PUBLIC_URL)
+      const getImageForCategory = (category) => {
+
+    switch (category.toLowerCase()) {
+        case 'BathroomEssentials':
+            return 'https://gadupathi.s3.ap-south-1.amazonaws.com/BathroomEssentials.jpg';
+        case 'Beauty':
+            return 'https://gadupathi.s3.ap-south-1.amazonaws.com/Beauty.jpg';
+        case 'Cleaning':
+            return 'https://gadupathi.s3.ap-south-1.amazonaws.com/Cleaning.jpg';
+        case 'Electronics':
+            return 'https://gadupathi.s3.ap-south-1.amazonaws.com/Electronics.jpg';
+        case 'Fashion':
+            return 'https://gadupathi.s3.ap-south-1.amazonaws.com/Fashion.jpg';
+        case 'Home':
+            return 'https://gadupathi.s3.ap-south-1.amazonaws.com/Home.jpg';
+        case 'HomeLiving':
+            return 'https://gadupathi.s3.ap-south-1.amazonaws.com/HomeLiving.jpg';
+        case 'Kitchenware':
+            return 'https://gadupathi.s3.ap-south-1.amazonaws.com/Kitchenware.jpg';
+        case 'PersonelCare':
+            return 'https://gadupathi.s3.ap-south-1.amazonaws.com/PersonelCare.jpg';
+        case 'Stationery':
+            return 'https://gadupathi.s3.ap-south-1.amazonaws.com/Stationery.jpg';
+        default:
+            // Return a fallback image or default image if the category doesn't match any case
+            return 'https://example.com/default.jpg';
+    }
+};
+    
 
   return (
     <HeroSectionContainer>
@@ -327,7 +334,7 @@ const HomeContent = ({ categories, searchQuery, setSearchQuery, suggestions, han
             key={index}
             active={selectedCategory === category}
             onClick={() => setSelectedCategory(category)}
-            $bgImage={`/images/${category.toLowerCase()}.jpg`}  // Use process.env.PUBLIC_URL for assets in public folder
+            $bgImage={getImageForCategory(category)}
             >
             <span style={{backgroundColor: 'whitesmoke',padding: '1.5vw',borderRadius:'10px'}}>{category}</span>
             </CategoryItem>
