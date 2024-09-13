@@ -29,7 +29,7 @@ const EcommerceWallet = () => {
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/api/profile', {
+        const response = await axios.get('https://recycle-backend-apao.onrender.com/api/profile', {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
 
@@ -53,32 +53,31 @@ const EcommerceWallet = () => {
 
 
   
-// Handle apply coupon with error handling and message inside input
+
 const handleApplyCoupon = async () => {
   try {
-    const response = await axios.post('http://localhost:8080/api/applyCoupon', { code: couponCode }, {
+    const response = await axios.post('https://recycle-backend-apao.onrender.com/api/applyCoupon', { code: couponCode }, {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
     });
-    // Assuming response has success field to determine if the coupon is valid
+  
     if (response.data.success) {
       setCouponMessage('Coupon applied successfully!');
-      setIsCouponError(false); // Reset error state
+      setIsCouponError(false);
     } else {
-      setCouponMessage('Invalid coupon code'); // Show error message
-      setIsCouponError(true); // Set error state
+      setCouponMessage('Invalid coupon code'); 
+      setIsCouponError(true); 
     }
   } catch (error) {
     setCouponMessage('Error applying coupon');
-    setIsCouponError(true); // Set error state for general errors
+    setIsCouponError(true);
   }
 };
 
 
-// Reset coupon state when input value changes
 const handleCouponInputChange = (e) => {
   setCouponCode(e.target.value);
-  setCouponMessage(''); // Reset the coupon message
-  setIsCouponError(false); // Reset error state
+  setCouponMessage(''); 
+  setIsCouponError(false); 
 };
 
 
@@ -108,7 +107,7 @@ const handleCouponInputChange = (e) => {
 
   function getCurrentISTDate() {
     const now = new Date();
-    const offset = 5.5 * 60 * 60 * 1000; // IST offset in milliseconds (5 hours 30 minutes)
+    const offset = 5.5 * 60 * 60 * 1000; 
     const istDate = new Date(now.getTime() + offset);
     const year = istDate.getUTCFullYear();
     const month = String(istDate.getUTCMonth() + 1).padStart(2, '0');
@@ -125,7 +124,7 @@ const handleCouponInputChange = (e) => {
       paddingBottom: '10vh',
       flexDirection: 'column',
       justifyContent: 'space-between',
-      marginBottom: '14vh', // was 130px
+      marginBottom: '14vh', 
     },
     walletContainer: {
       backgroundColor: '#92E792',
@@ -139,24 +138,24 @@ const handleCouponInputChange = (e) => {
     },
     section: {
       backgroundColor: '#f9f9f9',
-      padding: '2vh', // was 20px
-      borderRadius: '1.5vw', // was 12px
-      boxShadow: '0 0.5vh 1.5vh rgba(0, 0, 0, 0.1)', // was 0 4px 12px
-      marginBottom: '2vh', // was 20px
+      padding: '2vh', 
+      borderRadius: '1.5vw', 
+      boxShadow: '0 0.5vh 1.5vh rgba(0, 0, 0, 0.1)',
+      marginBottom: '2vh', 
       transition: 'all 0.3s ease',
-      margin: '1vh', // was 10px
+      margin: '1vh', 
     },
     sectionTitle: {
-      fontSize: '2rem', // was 22px
+      fontSize: '2rem',
       fontWeight: '600',
-      marginBottom: '1.5vh', // was 15px
+      marginBottom: '1.5vh',
       color: '#333',
     },
     walletBalance: {
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
-      marginBottom: '1vh', // was 10px
+      marginBottom: '1vh', 
     },
     checkboxLabel: {
       display: 'flex',
@@ -173,9 +172,9 @@ const handleCouponInputChange = (e) => {
       position: 'relative',
       display: 'flex',
       alignItems: 'center',
-      marginRight: '2vw', // was 10px
-      border: '0.5vh solid #ccc', // was 2px
-      borderRadius: '1vw', // was 4px
+      marginRight: '2vw', 
+      border: '0.5vh solid #ccc',
+      borderRadius: '1vw', 
       transition: 'all 0.3s ease',
     },
     customCheckbox: {
@@ -186,20 +185,20 @@ const handleCouponInputChange = (e) => {
       width: 0,
     },
     customCheckboxSpan: {
-      height: '3vw', // was 2vw + padding
-      width: '3vw', // was 2vw + padding
+      height: '3vw', 
+      width: '3vw',
       padding: '0.7vw',
-      backgroundColor: '#ccc', // Default background color
-      borderRadius: '1vw', // was 4px
+      backgroundColor: '#ccc',
+      borderRadius: '1vw',
       transition: '0.3s',
     },
     customCheckboxContainerChecked: {
-      border: '0.5vh solid #4caf50', // was 2px
+      border: '0.5vh solid #4caf50',
       padding: '1vw',
-      backgroundColor: '#e8f5e9', // Light green background
+      backgroundColor: '#e8f5e9',
     },
     customCheckboxChecked: {
-      backgroundColor: '#4caf50', // Green background when activated
+      backgroundColor: '#4caf50',
     },
     walletInputContainer: {
       display: 'flex',
@@ -207,79 +206,79 @@ const handleCouponInputChange = (e) => {
       alignItems: 'flex-end',
     },
     walletInput: {
-      padding: '1vh', // was 10px
-      border: '0.2vh solid #ddd', // was 1px
-      borderRadius: '1.5vw', // was 6px
+      padding: '1vh',
+      border: '0.2vh solid #ddd',
+      borderRadius: '1.5vw',
       width: '40vw',
-      fontSize: '0.8rem', // was 16px
+      fontSize: '0.8rem',
       transition: 'all 0.3s ease',
     },
     remainingText: {
-      fontSize: '0.8rem', // was 14px
+      fontSize: '0.8rem',
       color: '#888',
     },
     couponSection: {
       display: 'flex',
       alignItems: 'center',
-      marginTop: '1vh', // was 10px
-      marginBottom: '1.5vh', // was 15px
+      marginTop: '1vh',
+      marginBottom: '1.5vh',
     },
     couponInputContainer: {
       display: 'flex',
       flexDirection: 'row',
       width: '95vw',
       height: '7vh',
-      padding: '1vw', // was 1vw (unchanged, already optimal)
-      border: '0.2vh solid #ddd', // was 1px
-      borderRadius: '1.5vw', // was 6px
+      padding: '1vw',
+      border: '0.2vh solid #ddd',
+      borderRadius: '1.5vw',
       overflow: 'hidden',
     },
     couponInput: {
       flex: 1,
       width: '55vw',
-      padding: '1vh', // was 10px
-      border: '0.5vw solid #ddd', // was 0.5vw (unchanged, already optimal)
-      borderRadius: '1.5vw', // was 6px
+      padding: '1vh',
+      border: '0.5vw solid #ddd',
+      borderRadius: '1.5vw',
       outline: 'none',
-      fontSize: '0.9rem', // was 16px
+      fontSize: '0.9rem',
     },
     applyButton: {
       backgroundColor: '#4caf50',
       color: '#fff',
       border: 'none',
-      borderRadius: '1.5vw', // was 6px
-      padding: '1vh', // was 10px
+      borderRadius: '1.5vw',
+      padding: '1vh',
       cursor: 'pointer',
-      fontSize: '0.9rem', // was 14px
+      fontSize: '0.9rem',
       fontWeight: 'bold',
       outline: 'none',
     },
     couponMessage: {
-      marginTop: '0.5vh', // was 5px
-      fontSize: '1.4rem', // was 14px
+      marginTop: '0.5vh',
+      fontSize: '1.4rem',
       color: '#d32f2f',
     },
     footer: {
       display: 'flex',
       justifyContent: 'space-around',
-      padding: '1vh', // was 10px
+      padding: '1vh',
       backgroundColor: '#fff',
     },
     addButton: {
       backgroundColor: '#6a1b9a',
       color: '#fff',
       border: 'none',
-      padding: '1vh', // was 10px
-      borderRadius: '1.2vw', // was 5px
+      padding: '1vh',
+      borderRadius: '1.2vw',
       cursor: 'pointer',
     },
     paymentSection: {
-      margin: '1vh', // was 10px
+      margin: '1vh',
       backgroundColor: '#fff',
-      padding: '2vh', // was 20px
-      borderRadius: '1.5vw', // was 10px
-      boxShadow: '0 0 1vh rgba(0, 0, 0, 0.1)', // was 0 0 10px
-      marginBottom: '19.7vh', // was 180px
+      padding: '2vh',
+      borderRadius: '1.5vw',
+      boxShadow: '0 0 1vh rgba(0, 0, 0, 0.1)',
+      marginBottom: '19.7vh',
     },
     radioContainer: {
       display: 'flex',
@@ -287,7 +286,7 @@ const handleCouponInputChange = (e) => {
       alignItems: 'start',
     },
     radioOption: {
-      marginBottom: '1vh', // was 10px
+      marginBottom: '1vh',
     },
     lottieFullScreen: {
       position: 'fixed',
@@ -371,12 +370,8 @@ const handleCouponInputChange = (e) => {
       backgroundColor: '#388e3c',
     },
   },
-
-
-  };
+};
   
-
-  // In the parent component
 
 const getTotalPrice = () => {
   return cart.reduce((total, item) => {
@@ -419,7 +414,7 @@ const getTotalPrice = () => {
 
   const updateGreenPoints = async (newBalance) => {
     try {
-      const response = await axios.post('http://localhost:8080/api/updateGreenPoints', { greenpoints: newBalance }, {
+      const response = await axios.post('https://recycle-backend-apao.onrender.com/api/updateGreenPoints', { greenpoints: newBalance }, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
 
@@ -431,7 +426,7 @@ const getTotalPrice = () => {
 
   const updateWalletBalance = async (newBalance) => {
     try {
-      const response = await axios.post('http://localhost:8080/api/updateWallet', { wallet: newBalance }, {
+      const response = await axios.post('https://recycle-backend-apao.onrender.com/api/updateWallet', { wallet: newBalance }, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
       setWalletBalance(Number(response.data.wallet) || 0);
@@ -442,9 +437,10 @@ const getTotalPrice = () => {
 
   const updateReCommerceOrderHistory = async (orderData) => {
     try {
-      await axios.post('http://localhost:8080/api/updateReCommerceOrderHistory', orderData, {
+      const response = await axios.post('https://recycle-backend-apao.onrender.com/api/update-users-eCommerceOrders', orderData, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
+      console.log('e-commerceOrdersUpdated', response.data);
     } catch (error) {
       console.error('Error updating reCommerce order history:', error);
     }
@@ -453,12 +449,11 @@ const getTotalPrice = () => {
   const handlePayment = async () => {
     const cartDetails = cartDetailsRef.current.getDetails();
 
-    // Validate required data
     if (!cartDetails.name) {
         alert('Name is required.');
         return;
     }
-    if (!cartDetails.phone) {
+    if (!profileData.contactNumber) {
         alert('Contact (Phone number) is required.');
         return;
     }
@@ -479,9 +474,9 @@ const getTotalPrice = () => {
 
     const orderData = {
         id: orderId.toString(),
-        userId: profileData.id, // Ensure this is available in profileData
+        userId: profileData.id,
         name: cartDetails.name,
-        contact: cartDetails.phone,
+        contact: profileData.contactNumber,
         location: {
             address: cartDetails.address,
             lat: cartDetails.location.lat,
@@ -509,36 +504,39 @@ const getTotalPrice = () => {
     console.log('address..',cartDetails.address); 
 
     try {
-        const response = await axios.post('http://localhost:8080/api/order', orderData);
+        const response = await axios.post('https://recycle-backend-apao.onrender.com/api/order', orderData);
         console.log('Order placed successfully:', response.data);
         alert('Order placed successfully');
 
-        // Update green points in local storage
+
         const totalGreenPoints = parseInt(profileGreenPoints) + parseInt(greenPointsInCart);
         console.log('total greenpoints', totalGreenPoints);
         localStorage.setItem('greenPoints', totalGreenPoints);
 
         await updateGreenPoints(totalGreenPoints);
 
-        // Update wallet balance
         const newWalletBalance = walletBalance - walletAmount;
         await updateWalletBalance(newWalletBalance);
 
-        // Update reCommerceOrderHistory
         const reCommerceOrderHistoryData = {
-            id: orderId,
-            totalPrice: orderData.totalPrice,
-            date: orderData.date,
-            greenpoints: greenPointsInCart
-        };
+          userId: profileData.id,
+          orderId: orderId,
+          productIds: cart.map(item => item.productId),
+          orderDate: new Date(),
+          deliveryDate: null,
+          orderValue: orderData.totalPrice,
+          paymentMethod: 'UPI',
+          deliveryAddress: cartDetails.address,
+          orderStatus: 'Processing'
+      };
         await updateReCommerceOrderHistory(reCommerceOrderHistoryData);
 
-        // Show Lottie animation
         setShowLottie(true);
-        // Hide Lottie animation after 5.5 seconds
         setTimeout(() => {
             setShowLottie(false);
+            navigate('/orders-dashboard');
         }, 4500);
+        
     } catch (error) {
         console.error('Error placing order:', error);
         alert('Error placing order');
@@ -580,9 +578,9 @@ const getTotalPrice = () => {
                     <div 
                           style={{
                             ...styles.couponInputContainer,
-                            borderColor: isCouponError ? '#D70040' : 'transparent', // Change border color based on error
-                            borderWidth: isCouponError ? '2px' : '1px', // Adjust the border width if needed
-                            borderStyle: 'solid', // Ensure the border is solid
+                            borderColor: isCouponError ? '#D70040' : 'transparent',
+                            borderWidth: isCouponError ? '2px' : '1px',
+                            borderStyle: 'solid',
                           }}
                         >
                           <input
@@ -630,12 +628,12 @@ const getTotalPrice = () => {
                                 <input
                                       type="number"
                                       className="walletInput"
-                                      value={walletAmount === 0 ? '' : walletAmount} // Show empty if zero
+                                      value={walletAmount === 0 ? '' : walletAmount}
                                       onChange={handleWalletAmountChange}
-                                      min={1} // Ensure the input cannot go below 1
+                                      min={1}
                                       max={Math.min(walletBalance, getTotalPrice())}
                                       style={styles.walletInput}
-                                      placeholder="0" // Placeholder for empty input
+                                      placeholder="0"
                                     />
 
                                 <div style={styles.remainingText}>

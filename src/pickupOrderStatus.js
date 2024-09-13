@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState,useRef, useEffect } from 'react';
+
 import styled, { keyframes } from 'styled-components';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Modal from 'react-modal';
@@ -7,19 +8,36 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import axios from 'axios';
 import BackArrow from './back.png';
 
+import mapboxgl from 'mapbox-gl';
+
+
 import Support from './support.png';
 
-import { Phone, ChatDots } from 'react-bootstrap-icons'; // Import icons
+import Expand from './expand.png';
+
+import { ArrowsFullscreen } from 'react-bootstrap-icons';
+
+import OrderDetails6 from './pickupStatus';
+import L from 'leaflet';
+
+import { Card, Button, Collapse } from 'react-bootstrap'; // Bootstrap components for better UI
+import { Phone, ChatDots } from 'react-bootstrap-icons'; // Icons from Bootstrap
 
 const mapboxAccessToken = 'pk.eyJ1IjoiZ3NhaXRlamEwMDEiLCJhIjoiY2x5a3MyeXViMDl3NjJqcjc2OHQ3NTVoNiJ9.b5q6xpWN2yqeaKTaySgcBQ';
 
-const truckIconUrl = './truck.png';
+const truckIconUrl = './truck.jpg';
+
+
 
 
 
 
 
 const PickupOrderStatus = ({ cancelOrder }) => {
+  const mapRef = useRef(null);
+  const mapContainerRef = useRef(null);
+
+
   const location = useLocation();
   const navigate = useNavigate();
   const orderInfo = location.state?.ordersInfo || {
@@ -33,18 +51,40 @@ const PickupOrderStatus = ({ cancelOrder }) => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
-  const [customerLocation, setCustomerLocation] = useState(null);
-  const [agentLocation, setAgentLocation] = useState(null);
-  const [routeData, setRouteData] = useState(null);
+  // const [customerLocation, setCustomerLocation] = useState(null);
+  // const [agentLocation, setAgentLocation] = useState(null);
+  // const [routeData, setRouteData] = useState(null);
   const [orderStatus, setOrderStatus] = useState('');
 
   const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
-  const [showAnimation, setShowAnimation] = useState(false); // New state for managing the animation display
+  const [showAnimation, setShowAnimation] = useState(false);
 
   const [pickupAgent, setPickupAgent] = useState(null);
   const [pickupInstructions, setPickupInstructions] = useState('');
   const [needHelp, setNeedHelp] = useState('');
 
+
+  const [isAgentExpanded, setIsAgentExpanded] = useState(false);
+  const [isOrderExpanded, setIsOrderExpanded] = useState(false);
+
+  const [isMapExpanded, setIsMapExpanded] = useState(false);
+
+  const [customerLocation, setCustomerLocation] = useState([37.7749, -122.4194]);
+  const [agentLocation, setAgentLocation] = useState([37.7749, -122.4195]);
+  const [routeData, setRouteData] = useState(null);
+
+  const [isSmallMapContainer,setIsSmallMapContainer] = useState(false);
+
+
+  const toggleOrderExpand = () => setIsOrderExpanded(!isOrderExpanded);
+
+
+  const toggleAgentExpand = () => setIsAgentExpanded(!isAgentExpanded);
+
+  const toggleMapExpand = () => setIsMapExpanded(prev => !prev);
+
+
+  
 
   const toggleSupportModal = () => {
     setIsSupportModalOpen(!isSupportModalOpen);
@@ -53,7 +93,7 @@ const PickupOrderStatus = ({ cancelOrder }) => {
   useEffect(() => {
     const fetchOrderStatus = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/api/order-status/${orderInfo.Id}`, {
+        const response = await axios.get(`https://recycle-backend-apao.onrender.com/api/order-status/${orderInfo.Id}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
         setOrderStatus(response.data.status);
@@ -67,7 +107,7 @@ const PickupOrderStatus = ({ cancelOrder }) => {
   useEffect(() => {
     const fetchPickupAgent = async () => {
       try {
-        const res = await axios.get(`http://localhost:8080/api/scrap-buyers/${orderInfo.pickupAgentId}`, {
+        const res = await axios.get(`https://recycle-backend-apao.onrender.com/api/scrap-buyers/${orderInfo.pickupAgentId}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
         setPickupAgent(res.data);
@@ -92,6 +132,14 @@ const PickupOrderStatus = ({ cancelOrder }) => {
     });
   }, []);
 
+
+  // useEffect(() => {
+  //   if (isMapExpanded && mapRef.current) {
+  //     mapRef.current.resize();
+  //   }
+  // }, [isMapExpanded]);
+
+  // Fetch route and update bounds
   useEffect(() => {
     if (customerLocation && agentLocation) {
       const fetchRoute = async () => {
@@ -103,10 +151,21 @@ const PickupOrderStatus = ({ cancelOrder }) => {
           console.error('Error fetching route data:', error);
         }
       };
-
       fetchRoute();
     }
   }, [customerLocation, agentLocation]);
+
+  useEffect(() => {
+    if (agentLocation && customerLocation) {
+        const bounds = [
+            [Math.min(agentLocation[1], customerLocation[1]), Math.min(agentLocation[0], customerLocation[0])], // SW corner
+            [Math.max(agentLocation[1], customerLocation[1]), Math.max(agentLocation[0], customerLocation[0])], // NE corner
+        ];
+        mapRef.current?.fitBounds(bounds, {
+            padding: 50, // Adjust padding to your preference
+        });
+    }
+}, [agentLocation, customerLocation]);
 
   const handlePickUpClick = () => {
     navigate('/market-price', { state: { ordersInfo: orderInfo } });
@@ -118,7 +177,7 @@ const PickupOrderStatus = ({ cancelOrder }) => {
 
   const confirmCancelOrder = async () => {
     try {
-      await axios.delete(`http://localhost:8080/api/order/${orderInfo.Id}`, {
+      await axios.delete(`https://recycle-backend-apao.onrender.com/api/order/${orderInfo.Id}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
       cancelOrder(orderInfo.Id);
@@ -156,6 +215,120 @@ const PickupOrderStatus = ({ cancelOrder }) => {
     return orderInfo.cart.reduce((total, item) => total + item.quantity * item.price, 0);
   };
 
+
+
+  const handleMapLoad = (event) => {
+    const map = event.target; // Access the actual Mapbox map instance
+  
+    // Add customer marker
+    new mapboxgl.Marker({ color: '#5D3FD3' })
+      .setLngLat([customerLocation[1], customerLocation[0]])
+      .addTo(map);
+  
+    // Add truck marker for the agent location
+    const el = document.createElement('div');
+    el.style.backgroundImage = `url(https://gadupathi.s3.ap-south-1.amazonaws.com/truck.jpg)`;
+    el.style.width = '32px';
+    el.style.height = '32px';
+    el.style.backgroundSize = 'cover';
+    el.style.borderRadius = '50%';
+    el.style.cursor = 'pointer';
+  
+    new mapboxgl.Marker(el)
+      .setLngLat([agentLocation[1], agentLocation[0]])
+      .addTo(map);
+  
+    // Check if route source exists, if not, add it
+    if (!map.getSource('route')) {
+      map.addSource('route', {
+        type: 'geojson',
+        data: {
+          type: 'Feature',
+          geometry: routeData,
+        },
+      });
+  
+      map.addLayer({
+        id: 'route',
+        type: 'line',
+        source: 'route',
+        layout: {
+          'line-join': 'round',
+          'line-cap': 'round',
+        },
+        paint: {
+          'line-color': '#888',
+          'line-width': 6,
+        },
+      });
+    }
+  };
+  
+  
+
+
+
+
+  // Define the custom truck icon
+const truckIcon = new L.Icon({
+  iconUrl: truckIconUrl,
+  iconSize: [20, 20], // Set the size of the icon
+  iconAnchor: [16, 32], // Anchor the icon (half of iconSize for centered icon)
+  popupAnchor: [0, -32], // Position where popups should appear
+});
+
+
+const MapContainer = () => (
+  <LargeMapContainer ref={mapContainerRef} expanded={isMapExpanded}>
+    <Map
+      ref={mapRef}
+      initialViewState={{
+        latitude: customerLocation[0],
+        longitude: customerLocation[1],
+        zoom: isMapExpanded ? 13 : 14,
+      }}
+      style={{ width: '100%', height: '100%' }}
+      mapStyle="mapbox://styles/mapbox/light-v11"
+      mapboxAccessToken={mapboxAccessToken}
+      onLoad={handleMapLoad} // Add onLoad here
+    >
+      {/* Customer Marker */}
+      <Marker latitude={customerLocation[0]} longitude={customerLocation[1]} color="#5D3FD3" />
+
+      {/* Agent Location Marker */}
+      {agentLocation && (
+        <Marker latitude={agentLocation[0]} longitude={agentLocation[1]}>
+          <div
+            style={{
+              backgroundImage: `url(${truckIconUrl})`,
+              width: '32px',
+              height: '32px',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }}
+          />
+        </Marker>
+      )}
+
+      {/* Route Layer */}
+      {routeData && (
+        <Source id="route" type="geojson" data={routeData}>
+          <Layer
+            id="route"
+            type="line"
+            layout={{ 'line-join': 'round', 'line-cap': 'round' }}
+            paint={{ 'line-color': '#888', 'line-width': 6 }}
+          />
+        </Source>
+      )}
+    </Map>
+
+    {isMapExpanded && <CloseButton onClick={toggleMapExpand}>Close</CloseButton>}
+  </LargeMapContainer>
+);
+
+  
+
   return (
     <Container>
       {showAnimation && (
@@ -174,33 +347,80 @@ const PickupOrderStatus = ({ cancelOrder }) => {
           <StyledBackArrow src={BackArrow} alt="Back" onClick={() => navigate(-1)} />
           <SupportIcon src={Support} alt="Support" onClick={toggleSupportModal} />
         </Header>
-        <StatusContainer>
-          <PackageId>Package ID: {orderInfo.Id || 'N/A'}</PackageId>
-          <StatusList>
-            <StatusItem $completed={isCompleted('scheduled')}>Pickup scheduled</StatusItem>
-            <StatusItem $completed={isCompleted('Pending')}>Pickup Approved</StatusItem>
-            <StatusItem $completed={isCompleted('in Progress')}>Pickup Truck near you</StatusItem>
-            <StatusItem $completed={isCompleted('completed')} $pulsating={isCompleted('completed')}>Pickup completed</StatusItem>
-          </StatusList>
-        </StatusContainer>
+            {!isMapExpanded && (
+                  <OrderDetails6 />
+            )}
 
-        <DeliveryPartnerContainer>
-            <ProfileImage src={pickupAgent?.profileImgUrl || 'default-profile.png'} alt="Pickup Agent" />
-            <AgentInfo>
-              <ContactIcons>
-              <IconButton onClick={() => window.location.href = `tel:${pickupAgent?.contact?.phonee}`}>
-                  <Phone />
-                </IconButton>
-                <IconButton onClick={() => window.location.href = `sms:${pickupAgent?.phone}`}>
-                  <ChatDots />
-                </IconButton>
-              </ContactIcons>
-              <Detail>Name: {pickupAgent?.name}</Detail>
-              <Detail>Location: {pickupAgent?.location?.address}</Detail>
-              <Detail>Reviews: {pickupAgent?.reviews}</Detail>
-              <Detail>Operational Hours: {pickupAgent?.operationalHours}</Detail>
-            </AgentInfo>
-        </DeliveryPartnerContainer>
+            {isMapExpanded && (
+              <div>
+                  {<MapContainer expanded={isMapExpanded} />}
+              </div>
+            )}
+
+          <StyledCard>
+          <Card.Header>
+            {/* Conditionally render based on the presence of pickupAgent */}
+            {pickupAgent ? (
+              <>
+                  <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <ProfileImage
+                      src={pickupAgent?.profileImage || 'default-profile.png'}
+                      alt="Pickup Agent"
+                    />
+                    <Card.Title style={{ marginLeft: 'auto' }}>
+                      {pickupAgent?.name || 'N/A'}
+                    </Card.Title>
+                    {!isMapExpanded && (
+                          <div style={{ marginLeft: '20vw', marginRight: '0' }}>
+                            <div style={{ display: 'flex', justifyContent: 'flex-end'}}>
+                              <ExpandButton onClick={toggleMapExpand}>
+                                <ArrowsFullscreen size={18} />
+                              </ExpandButton>
+                            </div>
+                              <MapContainer expanded={isMapExpanded} />
+                          </div>
+                      )}                                                                                                                                                                                            
+                  </div>
+                    <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', width: '100%' }}>
+                      <AgentInfo>
+                        <ContactIcons>
+                          <Button
+                            variant="outline-primary"
+                            onClick={() => window.location.href = `tel:${pickupAgent?.contact?.phone}`}
+                          >
+                            <Phone />
+                          </Button>
+                          <Button
+                            variant="outline-success"
+                            onClick={() => window.location.href = `sms:${pickupAgent?.phone}`}
+                          >
+                            <ChatDots />
+                          </Button>
+                        </ContactIcons>
+                      </AgentInfo>
+                      <ToggleButton style={{ marginLeft: 'auto' }} onClick={toggleAgentExpand}>
+                        {isAgentExpanded ? 'Less' : 'More'}
+                      </ToggleButton>
+                    </div>
+                    <Collapse in={isAgentExpanded}>
+                      <Card.Body>
+                        <Card.Text>{pickupAgent?.location?.address || 'N/A'}</Card.Text>
+                        <Detail><strong>Reviews:</strong> {pickupAgent?.reviews || 'N/A'}</Detail>
+                        <Detail><strong>Operational Hours:</strong> {pickupAgent?.operationalHours || 'N/A'}</Detail>
+                      </Card.Body>
+                    </Collapse>
+                  </>
+                ) : (
+                  // Display message when the pickup agent is not assigned
+                  <Card.Body>
+                    <Card.Text style={{ textAlign: 'center', fontWeight: 'bold', color: 'gray' }}>
+                      Pickup agent is not yet assigned for Your order.
+                    </Card.Text>
+                  </Card.Body>
+                )}
+              </Card.Header>
+            </StyledCard>
+
 
           <PickupInstructionsContainer>
             <SectionHeader>Pickup Instructions</SectionHeader>
@@ -210,9 +430,6 @@ const PickupOrderStatus = ({ cancelOrder }) => {
               onChange={(e) => setPickupInstructions(e.target.value)}
               placeholder="Enter any special instructions for pickup"
             />
-          </PickupInstructionsContainer>
-
-          <NeedHelpContainer>
             <SectionHeader>Need Help?</SectionHeader>
             <NeedHelpInput
               type="text"
@@ -220,36 +437,49 @@ const PickupOrderStatus = ({ cancelOrder }) => {
               onChange={(e) => setNeedHelp(e.target.value)}
               placeholder="Describe your issue or question"
             />
-          </NeedHelpContainer>
+          </PickupInstructionsContainer>
+
 
           
-        <OrderDetails>
-          <DetailContainer>
-            <Detail>Customer: {orderInfo.name || 'N/A'}</Detail>
-            <Detail>Package weight: {orderInfo.totalWeight || 'N/A'} kg</Detail>
+              {/* Updated OrderDetails */}
+      <StyledCard>
+        <Card.Header>
+          <div style={{display:'flex',flexDirection:'row',alignItems: 'center', width: '100%' }}>
+            <Card.Title>Order Details</Card.Title>
+            <ToggleButton style={{ marginLeft: 'auto'}} onClick={toggleOrderExpand}>{isOrderExpanded ? 'Less' : 'More'}</ToggleButton>
+          </div>
+          <Card.Text>Package Weight: {orderInfo.totalWeight || 'N/A'} kg</Card.Text>
+          <Detail>Customer: {orderInfo.name || 'N/A'}</Detail>
             <Detail>Order Status: {orderInfo.status || 'N/A'}</Detail>
-            <Detail>Schedule Pickup: {orderInfo.schedulePickup || 'N/A'}</Detail>
-          </DetailContainer>
+            <Detail>Scheduled Pickup: {orderInfo.schedulePickup || 'N/A'}</Detail>
+        </Card.Header>
+        <Collapse in={isOrderExpanded}>
+          <Card.Body>
 
           <PickupSummary>
-            <SectionHeader>Pickup Summary</SectionHeader>
-            <MaterialsContainer>
-              <MaterialsHeader>List of materials:</MaterialsHeader>
-              <MaterialsList>
-                {orderInfo.cart?.map((item, index) => (
-                  <MaterialItem key={index}>{item.name} - {item.quantity} x ₹{item.price} = ₹{item.quantity * item.price}</MaterialItem>
-                )) || 'N/A'}
-              </MaterialsList>
-              <TotalPrice>Est. Total Price: ₹{calculateTotalPrice()}</TotalPrice>
-            </MaterialsContainer>
-          </PickupSummary>
+                <SectionHeader>Pickup Summary</SectionHeader>
+                <MaterialsContainer>
+                  <MaterialsHeader>Materials:</MaterialsHeader>
+                  <MaterialsList>
+                    {orderInfo.cart?.map((item, index) => (
+                      <MaterialItem key={index}>
+                        {item.name} - {item.quantity} x ₹{item.price} = ₹{item.quantity * item.price}
+                      </MaterialItem>
+                    )) || 'N/A'}
+                  </MaterialsList>
+                  <TotalPrice>Total: ₹{calculateTotalPrice()}</TotalPrice>
+                </MaterialsContainer>
+              </PickupSummary>
 
-        </OrderDetails>
+          </Card.Body>
+        </Collapse>
+      </StyledCard>
+
       </Content>
-      <Footer>
+      {/* <Footer>
         <FooterButton onClick={handlePickUpClick}>Market price</FooterButton>
         <FooterButton onClick={handleTrackOrderClick}>Track Your Pickup</FooterButton>
-      </Footer>
+      </Footer> */}
       <SupportModalContainer
         isOpen={isSupportModalOpen}
         onRequestClose={toggleSupportModal}
@@ -274,59 +504,7 @@ const PickupOrderStatus = ({ cancelOrder }) => {
         <ModalOption onClick={() => { /* Handle Help click */ }}>Help</ModalOption>
         <ModalOption onClick={handleCancelOrder}>Cancel Order</ModalOption>
       </SupportModalContainer>
-      <Modal
-        isOpen={isModalOpen}
-        onRequestClose={handleCloseModal}
-        contentLabel="Track Order"
-        style={{
-          content: {
-            top: '50%',
-            left: '50%',
-            right: 'auto',
-            bottom: 'auto',
-            marginRight: '-50%',
-            transform: 'translate(-50%, -50%)',
-            width: '80%',
-            height: '80%',
-          },
-        }}
-      >
-        {customerLocation && agentLocation && (
-          <Map
-            initialViewState={{
-              latitude: customerLocation[0],
-              longitude: customerLocation[1],
-              zoom: 12,
-            }}
-            style={{ width: '100%', height: '100%' }}
-            mapStyle="mapbox://styles/mapbox/streets-v11"
-            mapboxAccessToken={mapboxAccessToken}
-          >
-            <Marker latitude={customerLocation[0]} longitude={customerLocation[1]} color="blue" />
-            <Marker latitude={agentLocation[0]} longitude={agentLocation[1]}>
-              <img src={truckIconUrl} alt="Truck Icon" width="30" height="30" />
-            </Marker>
-            {routeData && (
-              <Source id="route" type="geojson" data={routeData}>
-                <Layer
-                  id="route"
-                  type="line"
-                  source="route"
-                  layout={{
-                    'line-join': 'round',
-                    'line-cap': 'round',
-                  }}
-                  paint={{
-                    'line-color': '#888',
-                    'line-width': 6,
-                  }}
-                />
-              </Source>
-            )}
-          </Map>
-        )}
-        <CloseButton onClick={handleCloseModal}>Close</CloseButton>
-      </Modal>
+      
       <Modal
         isOpen={isConfirmModalOpen}
         onRequestClose={handleCloseConfirmModal}
@@ -362,6 +540,9 @@ const PickupOrderStatus = ({ cancelOrder }) => {
 
 export default PickupOrderStatus;
 
+
+
+
 const Container = styled.div`
   display: flex;
   flex-direction: column;
@@ -369,7 +550,7 @@ const Container = styled.div`
   justify-content: flex-start;
   height: 100vh;
   background: linear-gradient(135deg, #f3f2f8 0%, #e0e0e0 100%);
-  padding: 2vh 4vw;
+  padding: 5vh 4vw;
   box-sizing: border-box;
   overflow: hidden;
   position: relative;
@@ -473,29 +654,29 @@ const StatusContainer = styled.div`
   box-shadow: 0 2vh 4vh rgba(0, 0, 0, 0.15);
   width: 100%;
   max-width: 90vw;
-  padding: 4vh;
-  margin-top: 5vh;
+  padding: 3vh;
+  margin-top: 2vh;
 `;
 
 const PackageId = styled.div`
   font-size: 3.5vw;
   font-weight: bold;
-  margin-bottom: 3vh;
+  margin-bottom: 1vh;
   color: #333;
 `;
 
 const StatusList = styled.div`
   display: flex;
   flex-direction: column;
-  margin: 4vh 0;
+  margin: 2vh 0;
 `;
 
 const StatusItem = styled.div`
   font-size: 3.5vw;
   color: ${props => (props.$completed ? '#4caf50' : '#bbb')};
   position: relative;
-  padding-left: 7vw;
-  margin-bottom: 4vh;
+  padding-left: 3vw;
+  margin-bottom: 2vh;
 
   &:before {
     content: '';
@@ -525,66 +706,228 @@ const StatusItem = styled.div`
   }
 `;
 
-const OrderDetails = styled.div`
-  background-color: #ffffff;
-  border-radius: 2vw;
-  box-shadow: 0 2vh 4vh rgba(0, 0, 0, 0.15);
-  width: 100%;
-  max-width: 90vw;
-  padding: 4vh;
-  margin-top: 5vh;
+
+const ExpandButton = styled.button`
+  background: none;
+  border: none;
+  color: black;
+  cursor: pointer;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease-in;
+
+  &:hover {
+    color: #388e3c;
+  }
+
+  &:focus {
+    outline: none;
+  }
 `;
 
-const DetailContainer = styled.div`
+const StyledCard = styled(Card)`
+  margin: 2vw 0;
+  width: 90vw;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 15px;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    transform: translateY(-5px);
+  }
+
+  .card-header {
+    display: flex;
+    flex-direction: column; /* Change to column layout */
+    align-items: flex-start; /* Align items to the start */
+    padding: 20px;
+    background-color: #f8f9fa;
+  }
+
+  .card-body {
+    padding: 20px;
+  }
+`;
+
+const ProfileImage = styled.img`
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 15px;
+`;
+
+const AgentInfo = styled.div`
+  flex: 1;
+`;
+
+
+const LargeMapContainer = styled.div`
+    position: relative;
+    width: ${({ expanded }) => expanded ? '80vw' : '90px'};
+    height: ${({ expanded }) => expanded ? '60vh' : '10vh'};
+    margin: ${({ expanded }) => expanded ? '0 auto' : '0'};
+    border-radius: 15px;
+    transition: all 0.3s ease;
+    z-index: ${({ expanded }) => expanded ? 500 : 1};
+    overflow: hidden;
+`;
+const CloseButton = styled.button`
+    position: absolute;
+    top: 3vh;
+    right: 4vw;
+    background: #fff;
+    border: none;
+    border-radius: 10%;
+    width: 14vw;
+    height: 2vh;
+    padding: 4vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    &:before {
+        content: '✕';
+        color: #333;
+        font-size: 4vw;
+    }
+`;
+
+const Detail = styled.p`
+  font-size: 16px;
+  color: #555;
+`;
+
+const ToggleButton = styled(Button)`
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  padding: 4vh;
-  background-color: #f9f9f9;
-  border-left: 1vw solid #4caf50;
-  margin-bottom: 4vh;
-  border-radius: 2vw;
+  align-items: center;
+  right: 0;
+  justify-content: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #b29dfa 0%, #6149b3 100%);
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 2vw 3vw;
+  font-size: 3vw;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  align-self: flex-end;
+  margin-left: auto;
+
+
+  &:hover {
+    background: linear-gradient(135deg, #b29dfa 0%, #6149b3 100%);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+
+
+  &::after {
+    content: '${props => (props.expanded ? "▲" : "▼")}';
+    font-size: 12px;
+    transition: transform 0.3s ease;
+    transform: rotate(${props => (props.expanded ? "180deg" : "0deg")});
+  }
+`;
+
+
+const ContactIcons = styled.div`
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+`;
+
+
+const PickupSummary = styled.div`
+  background: linear-gradient(135deg, #ffffff, #f3f4f7); /* Subtle gradient */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Soft shadow */
+  border-radius: 15px; /* Rounded corners */
+  padding: 20px; /* Inner padding for content */
+  margin-top: 20px;
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-5px); /* Lift effect on hover */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); /* Enhanced shadow on hover */
+  }
+`;
+
+const SectionHeader = styled.h2`
+  font-size: 15px;
+  font-weight: bold;
+  margin-bottom: 2vw;
+  color: #333;
+  text-align: center; /* Centered heading */
 `;
 
 const MaterialsContainer = styled.div`
-  padding: 3vh;
-  background-color: #f1f1f1;
-  border-left: 1vw solid #4caf50;
-  border-radius: 2vw;
+  background-color: #f9fafb;
+  border-radius: 10px;
+  padding: 15px;
+  margin-top: 10px;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05); /* Inner shadow for depth */
 `;
 
-const MaterialsHeader = styled.div`
-  font-size: 3.5vw;
-  font-weight: bold;
-  margin-bottom: 3vh;
-  color: #333;
+const MaterialsHeader = styled.h3`
+  font-size: 18px;
+  font-weight: 600;
+  color: #444;
+  margin-bottom: 10px;
 `;
 
 const MaterialsList = styled.ul`
-  list-style: none;
+  list-style-type: none; /* Remove default bullet points */
   padding: 0;
   margin: 0;
 `;
 
 const MaterialItem = styled.li`
-  font-size: 3.5vw;
-  padding: 2vh 0;
-  border-bottom: 1px solid #ddd;
-  color: #555;
+  font-size: 16px;
+  color: #666;
+  padding: 10px 0;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.3s ease;
 
   &:last-child {
     border-bottom: none;
   }
+
+  &:hover {
+    background-color: #f0f4ff; /* Light hover background */
+  }
+
+  /* Styling for the quantity and price parts to be emphasized */
+  span {
+    font-weight: bold;
+    color: #333;
+  }
 `;
 
-const TotalPrice = styled.li`
-  font-size: 3.5vw;
-  padding: 2vh 0;
+const TotalPrice = styled.p`
+  font-size: 18px;
   font-weight: bold;
-  color: #000;
+  color: #007bff;
+  margin-top: 20px;
+  text-align: right; /* Align total to the right */
+  border-top: 2px solid #e0e0e0;
+  padding-top: 10px;
 `;
+
+
 
 const Footer = styled.div`
   display: flex;
@@ -593,7 +936,7 @@ const Footer = styled.div`
   position: fixed;
   bottom: 0;
   background: linear-gradient(135deg, #b29dfa 0%, #6149b3 100%);
-  padding: 1.5vh 0;
+  padding: 1vh 0;
   box-shadow: 0 -1vh 3vh rgba(0, 0, 0, 0.3);
   border-top-left-radius: 5vw;
   border-top-right-radius: 5vw;
@@ -607,7 +950,7 @@ const FooterButton = styled.button`
   color: black;
   margin: 2vh 1vw;
   cursor: pointer;
-  padding: 2vh 3vw;
+  padding: 2vh 2vw;
   border-radius: 5vw;
   transition: background-color 0.3s ease, transform 0.2s ease;
   box-shadow: 0 1vh 3vh rgba(0, 0, 0, 0.2);
@@ -622,28 +965,12 @@ const FooterButton = styled.button`
   }
 `;
 
-const CloseButton = styled.button`
-  background: none;
-  border: none;
-  font-size: 3.5vw;
-  color: #333;
-  cursor: pointer;
-  padding: 2vh 3vw;
-  border-radius: 2vw;
-  transition: background-color 0.3s ease;
-  position: absolute;
-  top: 2vh;
-  right: 2vw;
 
-  &:hover {
-    background-color: #f2f2f2;
-  }
-`;
 
 const ConfirmText = styled.p`
   font-size: 3.5vw;
   text-align: center;
-  margin-bottom: 3vh;
+  margin-bottom: 2vh;
   color: #333;
 `;
 
@@ -658,7 +985,7 @@ const ConfirmButton = styled.button`
   color: white;
   border: none;
   border-radius: 2vw;
-  padding: 2vh 3vw;
+  padding: 2vh 1vw;
   cursor: pointer;
   transition: background-color 0.3s ease, transform 0.2s ease;
   box-shadow: 0 1vh 3vh rgba(0, 0, 0, 0.1);
@@ -678,7 +1005,7 @@ const CancelButton = styled.button`
   color: white;
   border: none;
   border-radius: 2vw;
-  padding: 2vh 3vw;
+  padding: 2vh 1vw;
   cursor: pointer;
   transition: background-color 0.3s ease, transform 0.2s ease;
   box-shadow: 0 1vh 3vh rgba(0, 0, 0, 0.1);
@@ -706,50 +1033,14 @@ const FullScreenAnimation = styled.div`
   justify-content: center;
 `;
 
-const DeliveryPartnerContainer = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background-color: #ffffff;
-  border-radius: 2vw;
-  box-shadow: 0 1vh 3vh rgba(0, 0, 0, 0.1);
-  padding: 3vh;
-  margin: 5vh 0;
-  width: 100%;
-  max-width: 90vw;
-`;
 
-const ProfileImage = styled.img`
-  width: 15vw;
-  height: 15vw;
-  border-radius: 50%;
-  object-fit: cover;
-  margin-right: 4vw;
-`;
-
-const Detail = styled.div`
-  font-size: 3.5vw;
-  color: #333;
-  margin-bottom: 1vh;
-
-  &:last-child {
-    margin-bottom: 0;
-  }
-`;
-
-const ContactIcons = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  margin-bottom: 2vh;
-`;
 
 const IconButton = styled.button`
   background: none;
   border: none;
-  margin-right: 3vw;
+  margin-right: 1vw;
   cursor: pointer;
-  font-size: 5vw;
+  font-size: 3vw;
   color: #4caf50;
 
   &:hover {
@@ -761,23 +1052,6 @@ const IconButton = styled.button`
   }
 `;
 
-const SectionHeader = styled.h3`
-  font-size: 4vw;
-  font-weight: bold;
-  margin-bottom: 3vh;
-  color: #333;
-`;
-
-const AgentInfo = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  padding: 4vh;
-  background-color: #f9f9f9;
-  border-left: 1vw solid #4caf50;
-  margin-bottom: 4vh;
-  border-radius: 2vw;
-`;
 
 const PickupInstructionsContainer = styled.div`
   background-color: #ffffff;
@@ -785,8 +1059,8 @@ const PickupInstructionsContainer = styled.div`
   box-shadow: 0 2vh 4vh rgba(0, 0, 0, 0.15);
   width: 100%;
   max-width: 90vw;
-  padding: 4vh;
-  margin-top: 5vh;
+  padding: 1vh;
+  margin-top: 1vh;
 `;
 
 const InstructionsInput = styled.input`
@@ -804,8 +1078,8 @@ const NeedHelpContainer = styled.div`
   box-shadow: 0 2vh 4vh rgba(0, 0, 0, 0.15);
   width: 100%;
   max-width: 90vw;
-  padding: 4vh;
-  margin-top: 5vh;
+  padding: 1vh;
+  margin-top: 1vh;
 `;
 
 const NeedHelpInput = styled.textarea`
@@ -818,12 +1092,4 @@ const NeedHelpInput = styled.textarea`
   resize: vertical;
 `;
 
-const PickupSummary = styled.div`
-  background-color: #ffffff;
-  border-radius: 2vw;
-  box-shadow: 0 2vh 4vh rgba(0, 0, 0, 0.15);
-  width: 100%;
-  max-width: 90vw;
-  padding: 4vh;
-  margin-top: 5vh;
-`;
+

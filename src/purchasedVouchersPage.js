@@ -8,7 +8,7 @@ const PurchasedVouchersPage = () => {
   useEffect(() => {
     const fetchPurchasedVouchers = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/getPurchasedVouchers');
+        const response = await axios.get('https://recycle-backend-apao.onrender.com/getPurchasedVouchers');
         setOrders(response.data.vouchers || []); // Ensure orders is an array even if data is missing
         console.log('purchased..',response.data);
       } catch (error) {

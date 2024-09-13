@@ -22,7 +22,7 @@ const Profile = () => {
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/api/profile', {
+        const response = await axios.get('https://recycle-backend-apao.onrender.com/api/profile', {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
         setProfileData(response.data);

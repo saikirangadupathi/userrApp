@@ -9,10 +9,10 @@ const PreviousOrders = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const pickupResponse = await axios.get('http://localhost:8080/api/profile', {
+        const pickupResponse = await axios.get('https://recycle-backend-apao.onrender.com/api/profile', {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
-        const reCommerceResponse = await axios.get('http://localhost:8080/api/profile', {
+        const reCommerceResponse = await axios.get('https://recycle-backend-apao.onrender.com/api/profile', {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
         setPickupOrders(pickupResponse.data.pickupHistory);

@@ -43,7 +43,7 @@ const Login = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post('http://localhost:8080/api/login', { username, password });
+      const response = await axios.post('https://recycle-backend-apao.onrender.com/api/login', { username, password });
       const { token } = response.data;
       localStorage.setItem('token', token);
       localStorage.setItem('Username', username);
@@ -90,7 +90,7 @@ const Login = () => {
     };
 
     try {
-      const response = await axios.post('http://localhost:8080/signup', user);
+      const response = await axios.post('https://recycle-backend-apao.onrender.com/signup', user);
       if (response.status === 201) {
         alert('Signup successful! Please log in.');
         setIsSignupModalOpen(false);

@@ -19,7 +19,7 @@ const PickupList = () => {
     // Fetch profile data and extract pickupIds
   const fetchProfileData = async () => {
           try {
-            const response = await axios.get('http://localhost:8080/api/profile', {
+            const response = await axios.get('https://recycle-backend-apao.onrender.com/api/profile', {
               headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
             });
             setProfileData(response.data);
@@ -41,7 +41,7 @@ const PickupList = () => {
         try {
           const pickupIdsParam = pickupIds.join(',');
       
-          const response = await axios.get('http://localhost:8080/getOrdersByUsers', {
+          const response = await axios.get('https://recycle-backend-apao.onrender.com/getOrdersByUsers', {
             params: { pickupIds: pickupIdsParam, userId: userId },
           });
           const filteredOrders = response.data.orderslist.filter((order) =>
@@ -86,7 +86,7 @@ const PickupList = () => {
           <OrderCard key={index} onClick={() => handleOrderClick(order)}>
             <OrderInfoContainer>
                   <ImageContainer>
-                    <img src={order.image || '/default-image.jpg'} alt={`Order ${order.Id}`} />
+                    <img src={order.images[0] || '/default-image.jpg'} alt={`Order ${order.Id}`} />
                   </ImageContainer>
                   <DetailCard>
                     <Detail>Package ID: {order.Id}</Detail>

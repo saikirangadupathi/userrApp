@@ -60,7 +60,7 @@ const CartDetails = forwardRef(({ getTotalPrice, useWallet, walletAmount, getFin
         const updatedCart = await Promise.all(
           cart.map(async (item) => {
             // Fetch product details using productId from the cart
-            const response = await axios.get(`http://localhost:8080/api/products/${item.productId}`);
+            const response = await axios.get(`https://recycle-backend-apao.onrender.com/api/products/${item.productId}`);
             const productDetails = response.data;
     
             // Return updated item with fetched product details

@@ -56,39 +56,38 @@ const ProductDescriptionPage = () => {
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/api/profile', {
+        const response = await axios.get('https://recycle-backend-apao.onrender.com/api/profile', {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
         setUserId(response.data.id);
-        console.log('userrId..',userId);
         setGreenPoints(response.data.greenPoints || 0);
         setLevel(Math.floor(response.data.greenPoints / 100));
-
-        // Save shoppingSavedCart to local storage as 'cart'
-        const savedCart = response.data.shoppingSavedCart || [];
         localStorage.setItem('userId', JSON.stringify(userId));
+        const savedCart = response.data.shoppingSavedCart || [];
+        console.log('savedCart1',savedCart);
 
         const updatedCart = await Promise.all(
           savedCart.map(async (item) => {
-            const response = await axios.get(`http://localhost:8080/api/products/${item.productId}`);
+            const response = await axios.get(`https://recycle-backend-apao.onrender.com/api/products/${item.productId}`);
             const productDetails = response.data;
-    
-            // Return updated item with fetched product details
+
             return {
               ...item,
               name: productDetails.name,
               price: productDetails.price,
-              images: productDetails.images[0],
-              greenpoints: productDetails.greenpoints,
+              images: productDetails.images,
+              greenPoints: productDetails.greenPoints,
               ecoFriendly: productDetails.ecoFriendly,
               discount: productDetails.discount,
             };
           })
         );
         setCart(updatedCart);
-        localStorage.setItem('cart', JSON.stringify(updatedCart));
-
-        console.log('carttt..',cart);
+        localStorage.setItem('savedCart', JSON.stringify(updatedCart));
+        const savedcart = JSON.parse(localStorage.getItem('savedCart')) || [];
+        setCart(updatedCart);
+        console.log('savedCart2',updatedCart);
+        console.log('savedCarttt..',cart);
 
 
       } catch (error) {
@@ -97,8 +96,6 @@ const ProductDescriptionPage = () => {
     };
     fetchProfileData();
 
-    const savedCart = JSON.parse(localStorage.getItem('cart')) || [];
-    setCart(savedCart);
 
     const productDetailsSection = document.getElementById('productDetails');
       if (productDetailsSection) {
@@ -521,7 +518,7 @@ const ProductDescriptionPage = () => {
 
   const handleSimilarProductClick = async (similarProduct) => {
     try {
-      const response = await axios.get('http://localhost:8080/products');
+      const response = await axios.get('https://recycle-backend-apao.onrender.com/products');
       const newSimilarProducts = response.data.filter(p => p.category === similarProduct.category && p._id !== similarProduct._id);
       setCurrentProduct(similarProduct);
       setCurrentSimilarProducts(newSimilarProducts);
@@ -533,6 +530,7 @@ const ProductDescriptionPage = () => {
   const addToCart = (item) => {
     setCart((prevCart) => {
       const existingItem = prevCart.find((cartItem) => cartItem.name === item.name);
+      console.log('addcart..',cart);
       if (existingItem) {
         return prevCart.map((cartItem) =>
           cartItem.name === item.name ? { ...cartItem, quantity: cartItem.quantity + 1 } : cartItem
@@ -541,6 +539,7 @@ const ProductDescriptionPage = () => {
         return [...prevCart, { ...item, quantity: 1 }];
       }
     });
+    handleSaveCart(cart);
   };
 
   const removeFromCart = (item) => {
@@ -554,6 +553,7 @@ const ProductDescriptionPage = () => {
         return prevCart.filter((cartItem) => cartItem.name !== item.name);
       }
     });
+    handleSaveCart(cart);
   };
 
   const getTotalPrice = () => {
@@ -565,71 +565,58 @@ const ProductDescriptionPage = () => {
       alert('Please add items to the cart.');
     } else {
       handleSaveCart( cart );
-      localStorage.setItem('cart', JSON.stringify( cart));
+      localStorage.setItem('savedCart', JSON.stringify( cart));
       navigate('/EcommerceWallet', { state: { cart, greenPointsInCart } });
 
     }
   };
 
-
-
-
   
   const handleSaveCart = async () => {
     try {
-      // Step 1: Save the cart before fetching product details
       let userId = localStorage.getItem('userId');
+
       if (userId) {
-        // Clean up the userId if it has extra quotes or whitespace
         userId = userId.replace(/^"|"$/g, '').trim();
       }
-  
-      // Transform the cart to match the backend schema (before fetching product details)
+
       const transformedCart = cart.map(item => ({
         productId: item.productId || item.id, 
         quantity: item.quantity,
         dateAdded: item.dateAdded || new Date(),
       }));
+
       console.log('transformedcart..',transformedCart);
-      // Send the cart to saveCart API first
+
       const saveCartResponse = await axios.post(
-        'http://localhost:8080/api/saveCart',
-        { cart: transformedCart, id: userId },   // Send cleaned userId with the cart
+        'https://recycle-backend-apao.onrender.com/api/saveCart',
+        { cart: transformedCart, id: userId },
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,  // Include the user's token
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
         }
       );
-  
-      // Alert the success message after saving the cart
       alert(saveCartResponse.data.message);
-  
-      // Step 2: After saving the cart, fetch product details
+      
       const updatedCart = await Promise.all(
         cart.map(async (item) => {
-          const response = await axios.get(`http://localhost:8080/api/products/${item.productId}`);
+          const response = await axios.get(`https://recycle-backend-apao.onrender.com/api/products/${item.productId}`);
           const productDetails = response.data;
-  
-          // Return updated item with fetched product details
+
           return {
             ...item,
             name: productDetails.name,
             price: productDetails.price,
-            images: productDetails.images[0],
+            images: productDetails.images,
             greenPoints: productDetails.greenPoints,
             ecoFriendly: productDetails.ecoFriendly,
             discount: productDetails.discount,
           };
         })
       );
-  
-      // Step 3: Update the cart with fetched product details and save it in local storage
-      setCart(updatedCart);
-      localStorage.setItem('cart', JSON.stringify(updatedCart));
-  
+      localStorage.setItem('savedCart', JSON.stringify(updatedCart));
       alert('Cart updated with product details!');
-      
     } catch (error) {
       console.error('Error during cart save or product details fetch:', error);
       alert('Failed to save cart or fetch product details.');
@@ -654,8 +641,8 @@ const ProductDescriptionPage = () => {
 
   const handleSendQuestion = () => {
     console.log('Question sent:', question);
-    // Add logic to send question to the server or handle it as needed
-    setQuestion(''); // Clear the input after sending
+
+    setQuestion('');
   };
 
   return (
@@ -915,25 +902,19 @@ const ProductDescriptionPage = () => {
         </Modal.Header>
         <Modal.Body>
           <div style={styles.cartItemsContainer}>
-
               {cart.map((item, index) => {
-                // Calculate the discounted price if a discount is available
                 const discountedPrice = item.discount ? item.price - (item.price * (item.discount / 100)) : item.price;
-
-                // Add to the total discounted price
                 totalDiscountedPrice += discountedPrice * item.quantity;
-
                 return (
                   <div key={index} style={styles.cartItemCard}>
                     <img
-                      src={item.images}
+                      src={item.images[0]}
                       alt={item.name}
                       style={styles.cartItemImage}
                     />
                     <div style={styles.cartItemInfo}>
                       <span style={styles.cartItemName}>{item.name}</span>
 
-                      {/* Display original price with strikethrough and discounted price below it */}
                       {item.discount ? (
                         <>
                           <span style={styles.cartItemPrice}>
@@ -952,14 +933,9 @@ const ProductDescriptionPage = () => {
                   </div>
                 );
               })}
-
           </div>
           <h3>Total: ₹{getTotalPrice()}</h3>
-
-           
           <h3>Total Green points:♻️ {greenPointsInCart}</h3>
-
-
         </Modal.Body>
         <Modal.Footer>
           <Button variant="primary" onClick={handlePaymentClick}>

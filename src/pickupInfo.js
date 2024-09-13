@@ -44,7 +44,7 @@ const PickupInfo = ({ addOrder, cart, updateCart }) => {
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/api/profile', {
+        const response = await axios.get('https://recycle-backend-apao.onrender.com/api/profile', {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
         setProfileData(response.data);
@@ -222,7 +222,7 @@ const PickupInfo = ({ addOrder, cart, updateCart }) => {
     const formData = new FormData();
     formData.append('image', file);
     try {
-      const response = await axios.post('http://localhost:8080/upload', formData);
+      const response = await axios.post('https://recycle-backend-apao.onrender.com/upload', formData);
       return response.data.imageUrl;
     } catch (error) {
       console.error('Error uploading the file', error);
@@ -256,7 +256,7 @@ const PickupInfo = ({ addOrder, cart, updateCart }) => {
     console.log('form..', form);
     try {
       if (form) {
-        const res = await axios.post('http://localhost:8080/placeorder', form);
+        const res = await axios.post('https://recycle-backend-apao.onrender.com/placeorder', form);
         if (res.status === 201) {
           // Update pickupHistory
           const pickupHistoryReq = {
@@ -269,11 +269,11 @@ const PickupInfo = ({ addOrder, cart, updateCart }) => {
             pickupDate: form.schedulePickup,
             status: 'Scheduled',
         };
-          await axios.post(`http://localhost:8080/pickupHistory/add`, pickupHistoryReq);
+          await axios.post(`https://recycle-backend-apao.onrender.com/pickupHistory/add`, pickupHistoryReq);
           console.log('Pickup history added successfully');
 
           const pickupHistoryData = { Id: form.Id, cart: form.cart };
-          await axios.post('http://localhost:8080/api/updatePickupHistory', pickupHistoryData, {
+          await axios.post('https://recycle-backend-apao.onrender.com/api/updatePickupHistory', pickupHistoryData, {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
           });
         }

@@ -123,7 +123,7 @@ const MarketPrice = ({ updateCart, cart, previousRoute }) => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/api/recycling-materials');
+        const response = await axios.get('https://recycle-backend-apao.onrender.com/api/recycling-materials');
         const categoryData = {};
         response.data.forEach(category => {
           categoryData[category.category] = category.items;

@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import axios from 'axios';
 import { Row, Col, Spinner } from 'react-bootstrap';
-import { Shop, WalletFill, TagFill, PersonCircle, ArrowLeft, Search } from 'react-bootstrap-icons';
+import { Shop, ListCheck, TagFill, PersonCircle, ArrowLeft, Search } from 'react-bootstrap-icons';
+
 
 Modal.setAppElement('#root');
 
@@ -56,7 +57,7 @@ const CouponPage = () => {
   useEffect(() => {
     const fetchCoupons = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/api/coupons');
+        const response = await axios.get('https://recycle-backend-apao.onrender.com/api/coupons');
         const coupons = response.data;
         
         // Group coupons by category
@@ -292,7 +293,7 @@ const CouponPage = () => {
     setSelectedPrice(null);
   
     try {
-      await axios.post('http://localhost:8080/addPurchasedVoucher', {
+      await axios.post('https://recycle-backend-apao.onrender.com/addPurchasedVoucher', {
         orderId: orderId,
         name: selectedCoupon.name,
         price: (order.price).toString(),
@@ -353,9 +354,9 @@ const CouponPage = () => {
           <TagFill size={30} />
           <span>Coupons</span>
         </div>
-        <div onClick={() => navigate('/EcommerceWallet')} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', fontSize: '14px', color: '#927AE7', cursor: 'pointer' }}>
-          <WalletFill size={30} />
-          <span>Wallet</span>
+        <div onClick={() => navigate('/orders-dashboard')} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', fontSize: '14px', color: '#927AE7', cursor: 'pointer' }}>
+          <ListCheck size={30} />
+          <span>OrdersList</span>
         </div>
         <div onClick={() => navigate('/profile')} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', fontSize: '14px', color: '#927AE7', cursor: 'pointer' }}>
           <PersonCircle size={30} />

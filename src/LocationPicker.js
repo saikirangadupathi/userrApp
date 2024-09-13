@@ -98,7 +98,7 @@ const fetchProfile = async () => {
   }
 
   try {
-    const response = await fetch('http://localhost:8080/api/profile', {
+    const response = await fetch('https://recycle-backend-apao.onrender.com/api/profile', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -419,7 +419,7 @@ const fetchProfile = async () => {
     };
   
     try {
-      const response = await fetch('http://localhost:8080/api/addresses', {
+      const response = await fetch('https://recycle-backend-apao.onrender.com/api/addresses', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -454,7 +454,7 @@ const fetchProfile = async () => {
   const confirmDeleteAddress = async () => {
     try {
       // Make API call to delete the address, passing userId in the request body
-      const response = await axios.delete(`http://localhost:8080/api/addresses/${addressToDelete}`, {
+      const response = await axios.delete(`https://recycle-backend-apao.onrender.com/api/addresses/${addressToDelete}`, {
         data: { userId }, // Sending the userId in the request body
       });
   

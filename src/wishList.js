@@ -111,7 +111,7 @@ const WishlistProducts = () => {
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/api/profile', {
+        const response = await axios.get('https://recycle-backend-apao.onrender.com/api/profile', {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
 
@@ -119,7 +119,7 @@ const WishlistProducts = () => {
         setUserId(profileData.id);
         const wishlistProductIds = profileData.wishlist ? profileData.wishlist.map(item => item.productId) : [];
 
-        const productResponse = await axios.get('http://localhost:8080/api/products');
+        const productResponse = await axios.get('https://recycle-backend-apao.onrender.com/api/products');
         setProducts(productResponse.data);
 
         const initialWishlistStatus = {};
@@ -142,7 +142,7 @@ const WishlistProducts = () => {
       const isCurrentlyInWishlist = wishlistStatus[productId];
       setAnimatingProductId(productId);
 
-      const response = await axios.post('http://localhost:8080/api/wishlist/toggle', { userId, productId });
+      const response = await axios.post('https://recycle-backend-apao.onrender.com/api/wishlist/toggle', { userId, productId });
       const newStatus = response.data.isActive;
 
       setTimeout(() => {
@@ -178,7 +178,7 @@ const WishlistProducts = () => {
       const performance = product.performance || { views: 0 };
       performance.views += 1;
 
-      const response = await axios.put(`http://localhost:8080/api/products/${product.id}/update-performance`, {
+      const response = await axios.put(`https://recycle-backend-apao.onrender.com/api/products/${product.id}/update-performance`, {
         id: productId,
         performance,
       });

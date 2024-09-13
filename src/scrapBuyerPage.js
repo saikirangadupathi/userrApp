@@ -16,7 +16,7 @@ import scrapBuyer from './scrapBuyer.png';
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiZ3NhaXRlamEwMDEiLCJhIjoiY2x5a3MyeXViMDl3NjJqcjc2OHQ3NTVoNiJ9.b5q6xpWN2yqeaKTaySgcBQ';
 
 // Replace with your backend API endpoint
-const BACKEND_MAPBOX_API = 'http://localhost:8080/api/mapbox';
+const BACKEND_MAPBOX_API = 'https://recycle-backend-apao.onrender.com/api/mapbox';
 
 const ScrapBuyersList = () => {
   const navigate = useNavigate();
@@ -43,7 +43,7 @@ const ScrapBuyersList = () => {
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/api/profile', {
+        const response = await axios.get('https://recycle-backend-apao.onrender.com/api/profile', {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
         setProfileData(response.data);
@@ -62,7 +62,7 @@ const ScrapBuyersList = () => {
 
         console.log("customerOrderInfo",customerOrderInfo.location.latitude,customerOrderInfo.location.longitude)
     
-        const res = await axios.get(`http://localhost:8080/api/scrap-buyers/nearby/${customerOrderInfo.location.latitude}/${customerOrderInfo.location.longitude}`);
+        const res = await axios.get(`https://recycle-backend-apao.onrender.com/api/scrap-buyers/nearby/${customerOrderInfo.location.latitude}/${customerOrderInfo.location.longitude}`);
     
         // Set the fetched scrap buyers data to state
         setScrapBuyers(res.data);
@@ -134,7 +134,7 @@ const ScrapBuyersList = () => {
     console.log('Request payload for placing order:', req);
   
     try {
-      const res = await axios.post('http://localhost:8080/placeorder', req);
+      const res = await axios.post('https://recycle-backend-apao.onrender.com/placeorder', req);
       
       if (res.status === 201) {
         alert('Order placed successfully');
@@ -146,7 +146,7 @@ const ScrapBuyersList = () => {
           status: 'Pending',
         };
   
-        await axios.post(`http://localhost:8080/scrapBuyer/${selectedBuyer.scrapBuyerId}/updateCurrentOrders`, updateOrderReq);
+        await axios.post(`https://recycle-backend-apao.onrender.com/scrapBuyer/${selectedBuyer.scrapBuyerId}/updateCurrentOrders`, updateOrderReq);
   
         const pickupHistoryReq = {
           userId: customerOrderInfo.customerId,
@@ -158,7 +158,7 @@ const ScrapBuyersList = () => {
           pickupDate: customerOrderInfo.schedulePickup,
           status: 'Pending',
       };
-          await axios.post(`http://localhost:8080/pickupHistory/add`, pickupHistoryReq);
+          await axios.post(`https://recycle-backend-apao.onrender.com/pickupHistory/add`, pickupHistoryReq);
           console.log('Pickup history added successfully');
   
 

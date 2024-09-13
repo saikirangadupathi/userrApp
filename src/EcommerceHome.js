@@ -10,7 +10,7 @@ import { ArrowLeft } from 'react-bootstrap-icons';
 import axios from 'axios';
 import styled from 'styled-components';
 
-import { Shop, WalletFill, TagFill, PersonCircle } from 'react-bootstrap-icons';
+import { Shop, ListCheck, TagFill, PersonCircle } from 'react-bootstrap-icons';
 import Carousel from 'react-multi-carousel';
 import 'react-multi-carousel/lib/styles.css';
 
@@ -87,14 +87,14 @@ const EcommerceHome = ({ previousRoute }) => {
    const levelContainerRef = useRef(null);
 
 
-   // New state to track if we are coming from the '/sell-buy' route
+
   const [fromSellBuy, setFromSellBuy] = useState(false);
 
 
   const [greenPointsInCart, setGreenpointsincart] = useState(0);
 
   useEffect(() => {
-    // Only set this to true on the initial render if the previous route is '/sell-buy'
+
     if (previousRoute === '/sell-buy') {
       setFromSellBuy(true);
     }
@@ -104,7 +104,7 @@ const EcommerceHome = ({ previousRoute }) => {
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/api/profile', {
+        const response = await axios.get('https://recycle-backend-apao.onrender.com/api/profile', {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
         setUserId(response.data.id);
@@ -116,10 +116,9 @@ const EcommerceHome = ({ previousRoute }) => {
 
         const updatedCart = await Promise.all(
           savedCart.map(async (item) => {
-            const response = await axios.get(`http://localhost:8080/api/products/${item.productId}`);
+            const response = await axios.get(`https://recycle-backend-apao.onrender.com/api/products/${item.productId}`);
             const productDetails = response.data;
     
-            // Return updated item with fetched product details
             return {
               ...item,
               name: productDetails.name,
@@ -142,7 +141,7 @@ const EcommerceHome = ({ previousRoute }) => {
 
     const fetchProducts = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/products');
+        const response = await axios.get('https://recycle-backend-apao.onrender.com/products');
         setProducts(response.data);
         setLoading(false);
         console.log('Products..',products);
@@ -158,7 +157,7 @@ const EcommerceHome = ({ previousRoute }) => {
     }, 4500);
 
 
-// Scroll event listener
+
 const handleScroll = () => {
   const levelContainerHeight = levelContainerRef.current?.offsetHeight;
   const scrollTop = window.scrollY;
@@ -166,7 +165,7 @@ const handleScroll = () => {
   if (levelContainerHeight) {
     const scrolled = scrollTop > levelContainerHeight;
     setIsScrolled(scrolled);
-    setShowBackToTop(scrolled);  // Show "Back to Top" button when scrolled
+    setShowBackToTop(scrolled);  
   }
 };
 
@@ -178,8 +177,6 @@ return () => {
 
   }, []);
 
-
-   // Function to scroll back to the top
    const handleBackToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -221,7 +218,7 @@ return () => {
       // Fetch product details and update the cart
       const updatedCart = await Promise.all(
         cart.map(async (item) => {
-          const response = await axios.get(`http://localhost:8080/api/products/${item.productId}`);
+          const response = await axios.get(`https://recycle-backend-apao.onrender.com/api/products/${item.productId}`);
           const productDetails = response.data;
   
           // Return updated item with fetched product details
@@ -254,7 +251,7 @@ return () => {
   
       // Send the transformed cart to the backend
       const response = await axios.post(
-        'http://localhost:8080/api/saveCart',
+        'https://recycle-backend-apao.onrender.com/api/saveCart',
         { cart: transformedCart ,id:userId },   // Send the transformed cart object
         {
           headers: {
@@ -283,9 +280,9 @@ return () => {
                               <TagFill size="6vw" />
                               <span style={{ marginTop: '1vh' }}>Coupons</span>
                             </div>
-                            <div onClick={() => navigate('/EcommerceWallet')} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', fontSize: '3vw', color: '#927AE7', cursor: 'pointer' }}>
-                              <WalletFill size="6vw" />
-                              <span style={{ marginTop: '1vh' }}>Wallet</span>
+                            <div onClick={() => navigate('/orders-dashboard')} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', fontSize: '3vw', color: '#927AE7', cursor: 'pointer' }}>
+                              <ListCheck size="6vw" />
+                              <span style={{ marginTop: '1vh' }}>OrdersList</span>
                             </div>
                             <div onClick={() => navigate('/profile')} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', fontSize: '3vw', color: '#927AE7', cursor: 'pointer' }}>
                               <PersonCircle size="6vw" />
@@ -314,7 +311,7 @@ return () => {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    transition: 'all 0.5s ease-in-out', // Smoother and slower transition
+    transition: 'all 0.5s ease-in-out', 
   },
   searchContainer: {
     position: isScrolled ? 'fixed' : 'relative',
@@ -328,8 +325,8 @@ return () => {
     padding: isScrolled ? '1.5vw' : '3vw',
     backgroundColor: '#fff',
     boxShadow: isScrolled ? '0 4px 8px rgba(0, 0, 0, 0.3)' : '0 4px 8px rgba(0, 0, 0, 0.1)',
-    borderRadius: isScrolled ? '20px' : '0', // Border radius when fixed
-    transition: 'all 0.5s ease-in-out', // Smooth transition for style changes
+    borderRadius: isScrolled ? '20px' : '0', 
+    transition: 'all 0.5s ease-in-out',
   },
 
   backToTop: {
@@ -346,7 +343,7 @@ return () => {
     cursor: 'pointer',
     zIndex: 101,
     fontSize: '3vw',
-    transition: 'opacity 0.5s ease-in-out', // Smooth transition for appearing and disappearing
+    transition: 'opacity 0.5s ease-in-out', 
     opacity: showBackToTop ? 1 : 0,
   },
     header: {
@@ -357,13 +354,13 @@ return () => {
       boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
     },
     backButton: {
-      fontSize: '4vw', // Adjusting with vw to maintain size proportion
+      fontSize: '4vw',
       border: 'none',
       background: 'none',
       cursor: 'pointer',
     },
     profileIcon: {
-      fontSize: '6vw', // Adjusting with vw to maintain size proportion
+      fontSize: '6vw', 
       cursor: 'pointer',
     },
     
@@ -373,19 +370,19 @@ return () => {
       alignItems: 'center',
       fontWeight: '600',
       fontFamily: 'Rhodium libre',
-      fontSize: '5vw', // Use vw for font size to maintain proportions
+      fontSize: '5vw', 
       marginBottom: '2vw',
       width: '100%',
     },
     progressInfo: {
       color: '#92E792',
-      fontSize: '3vw', // Use vw for font size to maintain proportions
+      fontSize: '3vw', 
       marginTop: '2vw',
     },
     greenPointsInfo: {
       fontFamily: 'Rhodium libre',
-      fontSize: '4vw', // Use vw for font size to maintain proportions
-      marginLeft: 'auto', // Align to the right
+      fontSize: '4vw', 
+      marginLeft: 'auto', 
       marginRight: '5vw',
     },
     progressBarContainer: {
@@ -396,7 +393,7 @@ return () => {
     progressBar: {
       backgroundColor: 'white',
       borderRadius: '10px',
-      height: '2vh', // Use vh to maintain height proportionate to viewport height
+      height: '2vh', 
       overflow: 'hidden',
       width: '100%',
       position: 'relative',
@@ -421,7 +418,7 @@ return () => {
       position: 'relative',
       backgroundColor: '#4caf50',
       color: 'white',
-      fontSize: '2.5vw', // Use vw to maintain font size proportion
+      fontSize: '2.5vw',
       borderRadius: '5px',
       padding: '1vw',
       marginTop: '5vw',
@@ -455,14 +452,14 @@ return () => {
     },
     itemsContainer: {
       display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fill, minmax(40vw, 1fr))', // Adjust with vw for responsiveness
-      gap: '2vw', // Spacing between grid items
+      gridTemplateColumns: 'repeat(auto-fill, minmax(40vw, 1fr))',
+      gap: '2vw', 
       padding: '1vw 1vw',
-      alignItems: 'start', // Align items to the start of the grid
+      alignItems: 'start', 
     },
     categoryItem: {
-      flexShrink: 0, // Prevent items from shrinking
-      minWidth: '25vw', // Adjust with vw to keep proportionate size
+      flexShrink: 0, 
+      minWidth: '25vw', 
       backgroundColor: '#fff',
       fontFamily: 'Rhodium libre',
       border: '1px solid #ccc',
@@ -473,11 +470,11 @@ return () => {
       padding: '2vw',
       textAlign: 'center',
       boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-      marginRight: '2vw', // Add some spacing between category items
+      marginRight: '2vw', 
     },
     activeCategoryItem: {
-      flexShrink: 0, // Prevent items from shrinking
-      minWidth: '25vw', // Adjust with vw to keep proportionate size
+      flexShrink: 0, 
+      minWidth: '25vw', 
       backgroundColor: '#508C9B',
       border: '1px solid #ccc',
       borderRadius: '18px',
@@ -488,10 +485,10 @@ return () => {
       textAlign: 'center',
       boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
       color: 'whitesmoke',
-      marginRight: '2vw', // Add some spacing between category items
+      marginRight: '2vw',
     },
     item: {
-      position: 'relative', // Add this to make the absolute positioning work
+      position: 'relative',
       display: 'flex',
       flexDirection: 'column',
       backgroundColor: '#fff',
@@ -503,21 +500,21 @@ return () => {
       padding: '3vw',
       boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
       cursor: 'pointer',
-      minHeight: '50vh', // Use vh to maintain height proportionate to viewport height
+      minHeight: '50vh', 
     },
     wishlistIcon: {
-      position: 'absolute', // Ensures it's positioned on top of the card
-      top: '3vw', // Position at top
-      right: '3vw', // Position at right
-      fontSize: '2vw', // Adjust icon size
-      color: '#FF6347', // Set your desired color (red or any other)
+      position: 'absolute', 
+      top: '3vw', 
+      right: '3vw',
+      fontSize: '2vw', 
+      color: '#FF6347', 
       cursor: 'pointer',
-      zIndex: 10, // Ensure it stays above other elements
+      zIndex: 10,
     },
   
-    // Ensure the parent container of the wishlistIcon (e.g., itemInfo) is set to relative so the absolute positioning works:
+    
     itemInfo: {
-      position: 'relative', // Add this to make the absolute positioning work
+      position: 'relative',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
@@ -526,22 +523,22 @@ return () => {
     image: {
       width: '100%',
       height: 'auto',
-      maxHeight: '30vh', // Use vh to maintain height proportionate to viewport height
+      maxHeight: '30vh', 
       objectFit: 'cover',
       borderRadius: '10px 10px 0 0',
       marginBottom: 'auto',
     },
     itemName: {
       fontWeight: 'bold',
-      fontSize: '2.5vw', // Use vw to maintain font size proportion
-      marginTop: '2vh', // Spacing between image and name
+      fontSize: '2.5vw', 
+      marginTop: '2vh',
       textAlign: 'center',
     },
     price: {
-      fontSize: '3vw', // Use vw to maintain font size proportion
+      fontSize: '3vw',
       color: '#757575',
       textAlign: 'center',
-      marginTop: '1vh', // Spacing between name and price
+      marginTop: '1vh',
     },
     filterSortContainer: {
       display: 'flex',
@@ -566,7 +563,7 @@ return () => {
     },
     filterIcon: {
       marginLeft: '2vw',
-      fontSize: '6vw', // Use vw to maintain font size proportion
+      fontSize: '6vw',
       cursor: 'pointer',
     },
     // searchContainer: {
@@ -585,13 +582,13 @@ return () => {
     },
     searchIcon: {
       marginLeft: '2vw',
-      fontSize: '6vw', // Use vw to maintain font size proportion
+      fontSize: '6vw',
       cursor: 'pointer',
     },
     levelContainer: {
       display: 'flex',
-      justifyContent: 'space-between', // Ensures the content is spaced between
-      alignItems: 'center', // Align items vertically centered
+      justifyContent: 'space-between',
+      alignItems: 'center',
       backgroundColor: '#201E43',
       color: 'whitesmoke',
       padding: '2vw',
@@ -600,16 +597,16 @@ return () => {
       display: 'flex',
       flexDirection: 'column',
       width: '77vw',
-      alignItems: 'flex-start', // Align all level info items to the start (left)
+      alignItems: 'flex-start',
     },
     cartIconContainer: {
       position: 'relative',
       cursor: 'pointer',
-      marginLeft: 'auto', // Pushes the cart icon to the right
+      marginLeft: 'auto',
       marginBottom: '2vw',
     },
     cartIcon: {
-      fontSize: '8vw', // Adjusting with vw to maintain size proportion
+      fontSize: '8vw',
       width: '5vw',
       height: '5vh',
     },
@@ -630,7 +627,7 @@ return () => {
       padding: '2vw 0',
     },
     cartItemCard: {
-      minWidth: '40vw', // Adjust with vw to keep proportionate size
+      minWidth: '40vw',
       backgroundColor: '#fff',
       borderRadius: '10px',
       boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
@@ -786,11 +783,11 @@ return () => {
     carouselContainer: {
       display: isSearching ? 'none' : 'block',
       marginTop: '2vw',
-      padding: '1vw', // Add some padding around the carousel for better spacing
-      overflow: 'hidden', // Hide any overflow
+      padding: '1vw', 
+      overflow: 'hidden',
     },
     carouselItem: {
-      minWidth: '40vw', // Adjust with vw to keep proportionate size
+      minWidth: '40vw',
       backgroundColor: '#fff',
       borderRadius: '10px',
       boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
@@ -800,23 +797,23 @@ return () => {
       flexDirection: 'column',
       justifyContent: 'space-between',
       alignItems: 'center',
-      height: '40vh', // Use vh to maintain height proportionate to viewport height
+      height: '40vh',
     },
     carouselImage: {
       width: '100%',
       height: 'auto',
-      maxHeight: '25vh', // Limit image height for responsiveness
+      maxHeight: '25vh',
       objectFit: 'cover',
       borderRadius: '10px 10px 0 0',
       marginBottom: 'auto',
     },
     carouselItemName: {
       fontWeight: 'bold',
-      fontSize: '4vw', // Use vw to maintain font size proportion
+      fontSize: '4vw',
       marginTop: '2vh',
     },
     carouselPrice: {
-      fontSize: '4vw', // Use vw to maintain font size proportion
+      fontSize: '4vw',
       color: '#757575',
       marginTop: '1vh',
     },
@@ -907,7 +904,7 @@ return () => {
       try {
         const wishlistStatus = {};
         for (const product of products) {
-          const response = await axios.get(`http://localhost:8080/api/wishlist/check`, {
+          const response = await axios.get(`https://recycle-backend-apao.onrender.com/api/wishlist/check`, {
             params: {
               userId: userId,
               productId: product.id,
@@ -939,7 +936,7 @@ return () => {
       const performance = product.performance || { views: 0 };
       performance.views += 1;
   
-      const response = await axios.put(`http://localhost:8080/api/products/${product.id}/update-performance`, {
+      const response = await axios.put(`https://recycle-backend-apao.onrender.com/api/products/${product.id}/update-performance`, {
         id: productId,
         performance
       });
@@ -962,7 +959,7 @@ return () => {
 const updateWishlistStatus = async (productId) => {
   try {
     // Make API call to toggle the wishlist
-    const response = await axios.post('http://localhost:8080/api/wishlist/toggle', { userId, productId });
+    const response = await axios.post('https://recycle-backend-apao.onrender.com/api/wishlist/toggle', { userId, productId });
     
     // Update the wishlist status based on the response
     setWishlistStatus((prevStatus) => ({
