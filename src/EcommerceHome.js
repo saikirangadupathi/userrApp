@@ -291,7 +291,7 @@ return () => {
   );
 
   const styles = {
-     ecommerceHome: {
+    ecommerceHome: {
     fontFamily: 'Arial, sans-serif',
     backgroundColor: '#D6CDF6',
     minHeight: '100vh',
@@ -301,11 +301,11 @@ return () => {
     marginBottom: '10vh',
   },
   levelContainer: {
-    backgroundColor: '#201E43',
     color: 'whitesmoke',
     padding: '1vw',
     textAlign: 'center',
     display: 'flex',
+    backgroundColor: 'transparent',
     flexDirection: 'column',
     alignItems: 'center',
     transition: 'all 0.5s ease-in-out', 
@@ -320,7 +320,7 @@ return () => {
     display: 'flex',
     alignItems: 'center',
     padding: isScrolled ? '1.5vw' : '3vw',
-    backgroundColor: '#fff',
+    backgroundColor: 'transparent',
     boxShadow: isScrolled ? '0 4px 8px rgba(0, 0, 0, 0.3)' : '0 4px 8px rgba(0, 0, 0, 0.1)',
     borderRadius: isScrolled ? '20px' : '0', 
     transition: 'all 0.5s ease-in-out',
@@ -332,7 +332,7 @@ return () => {
     top: '10vh',
     left: '50%',
     transform: 'translateX(-50%)',
-    backgroundColor: '#4caf50',
+    backgroundColor: 'grey',
     color: '#fff',
     border: 'none',
     borderRadius: '20px',
@@ -369,10 +369,11 @@ return () => {
       fontFamily: 'Rhodium libre',
       fontSize: '5vw', 
       marginBottom: '2vw',
+      padding: '1vw',
       width: '100%',
     },
     progressInfo: {
-      color: '#92E792',
+      color: '#FFFFF0',
       fontSize: '3vw', 
       marginTop: '2vw',
     },
@@ -396,7 +397,7 @@ return () => {
       position: 'relative',
     },
     progress: {
-      backgroundColor: '#92E792',
+      backgroundColor: '#4caf50',
       height: '100%',
       width: `${greenPoints % 100}%`,
       transition: 'width 0.5s',
@@ -409,8 +410,12 @@ return () => {
       top: 0,
       bottom: 0,
       width: '1vw',
-      backgroundColor: 'yellow',
-    },
+      backgroundColor: '#D6CDF6',
+      borderTopLeftRadius: '5vw',
+      borderBottomLeftRadius: '5vw',
+      borderTopRightRadius: '5vw',
+      borderBottomRightRadius: '5vw',
+    },    
     spinWheelButton: {
       position: 'relative',
       backgroundColor: '#4caf50',
@@ -586,8 +591,8 @@ return () => {
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
-      backgroundColor: '#201E43',
-      color: 'whitesmoke',
+      backgroundColor: 'transparent',
+      color: 'black',
       padding: '2vw',
     },
     levelInfoContainer: {
@@ -860,8 +865,8 @@ return () => {
 
   const handleSuggestionClick = (suggestion) => {
     setSearchQuery(suggestion);
-    setSuggestions([]);
     handleSearch();
+    setSuggestions([]);
   };
 
   const resetSearch = () => {
@@ -952,16 +957,16 @@ return () => {
   };
 
 
-// Function to toggle wishlist status and handle API call
+
 const updateWishlistStatus = async (productId) => {
   try {
-    // Make API call to toggle the wishlist
+
     const response = await axios.post('https://recycle-backend-apao.onrender.com/api/wishlist/toggle', { userId, productId });
     
-    // Update the wishlist status based on the response
+
     setWishlistStatus((prevStatus) => ({
       ...prevStatus,
-      [productId]: response.data.isActive, // Toggle active state
+      [productId]: response.data.isActive,
     }));
 
     console.log('Wishlist updated successfully');
@@ -973,16 +978,15 @@ const updateWishlistStatus = async (productId) => {
 const toggleWishlist = (productId) => {
   const isActive = wishlistStatus[productId];
 
-  // If transitioning from inactive to active, play animation
   if (!isActive) {
-    setAnimatingProductId(productId); // Start the animation for the clicked product
+    setAnimatingProductId(productId);
 
     setTimeout(() => {
-      setAnimatingProductId(null); // Stop the animation after it completes
-      updateWishlistStatus(productId); // Call the API after animation
-    }, 1800); // Animation duration (2 seconds)
+      setAnimatingProductId(null);
+      updateWishlistStatus(productId);
+    }, 1800);
   } else {
-    // Directly call the API if it's active to inactive
+
     updateWishlistStatus(productId);
   }
 };
@@ -998,15 +1002,13 @@ const toggleWishlist = (productId) => {
   
     return productsList.map((product, index) => {
 
-      // Calculate the discounted price
+
       const discountedPrice = product.price - (product.price * (product.discount / 100));
   
-      // Calculate the average rating from reviews
       const averageRating = product.reviews.length > 0
         ? (product.reviews.reduce((acc, review) => acc + review.rating, 0) / product.reviews.length).toFixed(1)
         : 0;
-  
-      // Create an array of stars for the rating
+
       const starRating = [];
       for (let i = 1; i <= 5; i++) {
         starRating.push(
@@ -1103,45 +1105,47 @@ const toggleWishlist = (productId) => {
 
   return (
     <div style={styles.ecommerceHome}>
-      <div id="levelContainer" ref={levelContainerRef} style={styles.levelContainer}>
-        <div style={styles.levelInfoContainer}>
-          <span style={styles.levelInfo}>
-            <span role="img" aria-label="coins">🪙</span> Level - {level}
-            <span style={styles.greenPointsInfo}>
-              Green Points: {greenPoints}
-            </span>
-          </span>
-          <div style={styles.progressBarContainer}>
-            <div style={styles.progressBar}>
-              <div style={styles.progress}></div>
-              {/* Checkpoints at every 25% */}
-              <div style={{ ...styles.checkpoint, left: '33%' }}></div>
-              <div style={{ ...styles.checkpoint, left: '68%' }}></div>
-              <div style={{ ...styles.checkpoint, left: '100%' }}></div>
-            </div>
-          </div>
-          <span style={styles.progressInfo}>
-            {100 - (greenPoints % 100)} Points to next level
-          </span>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <div style={styles.cartIconContainer} onClick={() => setModalIsOpen(true)}>
-              <CartIcon cart={cart} setModalIsOpen={setModalIsOpen} />
-              {cart.length > 0 && <span style={styles.cartBubble}>{cart.length}</span>}
-            </div>
-            <button style={styles.spinWheelButton}>
-              Spin Wheel
-              {/* Bubble count for checkpoints crossed */}
-              {Math.floor((greenPoints % 100) / 33.3) > 0 && (
-                <span style={styles.spinWheelBubble}>
-                  {Math.floor((greenPoints % 100) / 33.3)}
-                </span>
-              )}
-            </button>
-          </div>
-      </div>
+      {!isSearching && <div id="levelContainer" ref={levelContainerRef} style={styles.levelContainer}>
+                      <div style={styles.levelInfoContainer}>
+                        <span style={styles.levelInfo}>
+                          <ArrowLeft style={{marginRight:'2vw'}} onClick={() => navigate('/sell-buy')} size="7vw" />
+                          <span role="img" aria-label="coins">🪙</span> Level - {level}
+                          <span style={styles.greenPointsInfo}>
+                            Green Points: {greenPoints}
+                          </span>
+                        </span>
+                        <div style={styles.progressBarContainer}>
+                          <div style={styles.progressBar}>
+                            <div style={styles.progress}></div>
+                            {/* Checkpoints at every 25% */}
+                            <div style={{ ...styles.checkpoint, left: '33%' }}></div>
+                            <div style={{ ...styles.checkpoint, left: '68%' }}></div>
+                            <div style={{ ...styles.checkpoint, left: '100%' }}></div>
+                          </div>
+                        </div>
+                        <span style={styles.progressInfo}>
+                          {100 - (greenPoints % 100)} Points to next level
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                          <div style={styles.cartIconContainer} onClick={() => setModalIsOpen(true)}>
+                            <CartIcon cart={cart} setModalIsOpen={setModalIsOpen} />
+                            {cart.length > 0 && <span style={styles.cartBubble}>{cart.length}</span>}
+                          </div>
+                          <button style={styles.spinWheelButton}>
+                            Spin Wheel
+                            {/* Bubble count for checkpoints crossed */}
+                            {Math.floor((greenPoints % 100) / 33.3) > 0 && (
+                              <span style={styles.spinWheelBubble}>
+                                {Math.floor((greenPoints % 100) / 33.3)}
+                              </span>
+                            )}
+                          </button>
+                        </div>
+                    </div>
+                  }
 
-      <div style={styles.searchContainer}>
+    <div style={styles.searchContainer}>
       {isSearching && <ArrowLeft onClick={resetSearch} style={{ cursor: 'pointer', color: 'black', marginRight: '10px' }} size={30} />}
       <input
         type="text"
@@ -1185,7 +1189,7 @@ const toggleWishlist = (productId) => {
         </div> */}
         
         
-            <HomeContent
+        {!isSearching && <HomeContent
                   categories={categories}
                   searchQuery={searchQuery}
                   setSearchQuery={setSearchQuery}
@@ -1195,6 +1199,8 @@ const toggleWishlist = (productId) => {
                   selectedCategory={selectedCategory}
                   setSelectedCategory={setSelectedCategory}
             />
+
+        }
 
         <div style={styles.carouselContainer}>
               <Carousel
