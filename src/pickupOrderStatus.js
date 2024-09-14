@@ -70,6 +70,7 @@ const PickupOrderStatus = ({ cancelOrder }) => {
   const [isMapExpanded, setIsMapExpanded] = useState(false);
 
   const [customerLocation, setCustomerLocation] = useState([37.7749, -122.4194]);
+  const [orderDestination,setOrderDestination] = useState([]);
   const [agentLocation, setAgentLocation] = useState([37.7749, -122.4195]);
   const [routeData, setRouteData] = useState(null);
 
@@ -97,6 +98,9 @@ const PickupOrderStatus = ({ cancelOrder }) => {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
         setOrderStatus(response.data.status);
+        console.log('status',response.data.status);
+        const {latitude, longitude }= response.data.location;
+        setCustomerLocation([ latitude, longitude]);
       } catch (error) {
         console.error('Error fetching order status:', error);
       }
@@ -111,7 +115,7 @@ const PickupOrderStatus = ({ cancelOrder }) => {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
         setPickupAgent(res.data);
-        console.log('agentt',res.data);
+        
       } catch (error) {
         console.error('Error fetching pickup agent:', error);
       }
@@ -367,7 +371,7 @@ const MapContainer = () => (
                       src={pickupAgent?.profileImage || 'default-profile.png'}
                       alt="Pickup Agent"
                     />
-                    <Card.Title style={{ marginLeft: 'auto' }}>
+                    <Card.Title style={{ marginLeft: 'auto',fontSize:'3vw' }}>
                       {pickupAgent?.name || 'N/A'}
                     </Card.Title>
                     {!isMapExpanded && (
