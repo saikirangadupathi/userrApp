@@ -79,14 +79,15 @@ const SearchInput = styled.input`
 
 const CategoryGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(6, 1fr);  // Maximum 6 columns
-  grid-template-rows: repeat(2, auto);  // 2 rows
-  gap: 3vw;  // Gap between grid items
-  overflow-x: auto;  // Enable horizontal scrolling
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: repeat(2, auto);
+  gap: 3vw;
+  overflow-x: auto;
   margin: 2vw;
-  white-space: nowrap;  // Ensure that items stay on one row
-  scroll-snap-type: x mandatory;  // Smooth scrolling
-  padding: 4vw;  // Add padding for better scrolling visibility
+  white-space: nowrap;
+  scroll-snap-type: x mandatory; 
+
+  
 `;
 
 const CategoryItem = styled.div`
@@ -94,7 +95,7 @@ const CategoryItem = styled.div`
   background-size: cover;
   background-position: center;
   min-width: 45vw;
-  height: 15vh;  // Increase height for better visual appearance
+  height: 15vh;
   padding: 2vw;
   text-align: center;
   font-size: 2vw;
@@ -102,21 +103,19 @@ const CategoryItem = styled.div`
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
   cursor: pointer;
 
-  transition: all 0.3s ease;  // Smooth transition for all properties
-  border: ${(props) => (props.active ? '2px solid #4CAF50' : '2px solid transparent')};  // Change border on active
-  opacity: ${(props) => (props.active ? 0.9 : 1)};  // Slightly reduce opacity for active state
+  transition: all 0.3s ease;
+  border: ${(props) => (props.active ? '2px solid #4CAF50' : '2px solid transparent')};
+  opacity: ${(props) => (props.active ? 0.9 : 1)};
 
   &:hover {
-    background-color: rgba(54, 69, 79, 0.8);  // Dark overlay on hover
-    color: white;
-    opacity: 0.8;  // Reduce opacity on hover
-    transform: scale(1.05);  // Slightly scale the item on hover
+    background-color: rgba(54, 69, 79, 0.8);
+    opacity: 0.8;
+    transform: scale(1.05);
   }
 
-  // Scale text when active
   & > span {
-    font-size: ${(props) => (props.active ? '3.5vw' : '3vw')};  // Increase text size when active
-    font-weight: ${(props) => (props.active ? 'bold' : 'normal')};  // Make text bold when active
+    font-size: ${(props) => (props.active ? '3.5vw' : '3vw')};
+    font-weight: ${(props) => (props.active ? 'bold' : 'normal')};
     color: ${(props) => (props.active ? '#333333' : '#4A4A4A')};
   }
 `;
@@ -293,23 +292,27 @@ const CountdownTimer = styled.div`
 
 
 const HomeContent = ({ categories, searchQuery, setSearchQuery, suggestions, handleSuggestionClick, handleSearch, selectedCategory, setSelectedCategory }) => {
-
+  
   return (
-    <HeroSectionContainer>
-      <HomeCardCarousel />
+    <div>
+      <h3>Shop by Categories</h3>
+        <CategoryGrid>
+            {categories.map((category, index) => (
+                <CategoryItem
+                key={index}
+                active={selectedCategory === category}
+                onClick={() => setSelectedCategory(category)}
+                $bgImage={`https://gadupathi.s3.ap-south-1.amazonaws.com/${category}.jpg`}
 
-    <CategoryGrid>
-        {categories.map((category, index) => (
-            <CategoryItem
-            key={index}
-            active={selectedCategory === category}
-            onClick={() => setSelectedCategory(category)}
-            $bgImage={`https://gadupathi.s3.ap-south-1.amazonaws.com/${category}.jpg`}
-            >
-            <span style={{backgroundColor: 'whitesmoke',padding: '1.5vw',borderRadius:'10px'}}>{category}</span>
-            </CategoryItem>
-        ))}
-    </CategoryGrid>
+                >
+                <span style={{backgroundColor: 'whitesmoke',padding: '1.5vw',borderRadius:'10px'}}>{category}</span>
+                </CategoryItem>
+            ))}
+        </CategoryGrid>
+
+<HeroSectionContainer>
+
+        <HomeCardCarousel />
 
 
 
@@ -399,8 +402,9 @@ const HomeContent = ({ categories, searchQuery, setSearchQuery, suggestions, han
           {/* Add more recommended products */}
         </RecommendationCarousel>
       </RecommendationsSection>
-
     </HeroSectionContainer>
+
+    </div>
   );
 };
 
