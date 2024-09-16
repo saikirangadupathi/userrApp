@@ -309,6 +309,9 @@ return () => {
     flexDirection: 'column',
     alignItems: 'center',
     transition: 'all 0.5s ease-in-out', 
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    zIndex: 2000,
+    boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.2)',
   },
   searchContainer: {
     position: isScrolled ? 'fixed' : 'relative',
@@ -316,7 +319,7 @@ return () => {
     width: isScrolled ? '90%' : '100%',
     left: isScrolled ? '50%' : '0',
     transform: isScrolled ? 'translateX(-50%)' : 'none',
-    zIndex: 1000,
+
     display: 'flex',
     alignItems: 'center',
     padding: isScrolled ? '1.5vw' : '3vw',
@@ -324,6 +327,9 @@ return () => {
     boxShadow: isScrolled ? '0 4px 8px rgba(0, 0, 0, 0.3)' : '0 4px 8px rgba(0, 0, 0, 0.1)',
     borderRadius: isScrolled ? '20px' : '0', 
     transition: 'all 0.5s ease-in-out',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',  // Make it transparent
+    zIndex: 2,  // Place above the video
+    boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.2)',  // Add a subtle shadow
   },
 
   backToTop: {
@@ -371,22 +377,26 @@ return () => {
       marginBottom: '2vw',
       padding: '1vw',
       width: '100%',
+      zIndex: 2000,
     },
     progressInfo: {
       color: '#FFFFF0',
       fontSize: '3vw', 
       marginTop: '2vw',
+      zIndex: 2000,
     },
     greenPointsInfo: {
       fontFamily: 'Rhodium libre',
       fontSize: '4vw', 
       marginLeft: 'auto', 
       marginRight: '5vw',
+      zIndex: 2000,
     },
     progressBarContainer: {
       position: 'relative',
       width: '100%',
       marginTop: '3vw',
+      zIndex: 2000,
     },
     progressBar: {
       backgroundColor: 'white',
@@ -395,6 +405,7 @@ return () => {
       overflow: 'hidden',
       width: '100%',
       position: 'relative',
+      zIndex: 2000,
     },
     progress: {
       backgroundColor: '#4caf50',
@@ -404,6 +415,7 @@ return () => {
       position: 'absolute',
       top: 0,
       left: 0,
+      zIndex: 2000,
     },
     checkpoint: {
       position: 'absolute',
@@ -415,6 +427,7 @@ return () => {
       borderBottomLeftRadius: '5vw',
       borderTopRightRadius: '5vw',
       borderBottomRightRadius: '5vw',
+      zIndex: 2000,
     },    
     spinWheelButton: {
       position: 'relative',
@@ -429,6 +442,7 @@ return () => {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
+      zIndex: 2000,
     },
     spinWheelBubble: {
       position: 'absolute',
@@ -439,9 +453,9 @@ return () => {
       borderRadius: '50%',
       padding: '1vw 2vw',
       fontSize: '2.5vw',
+      zIndex: 2000,
     },
     section: {
-      padding: '1vw',
       overflowY: 'auto',
       flex: 1,
     },
@@ -606,11 +620,13 @@ return () => {
       cursor: 'pointer',
       marginLeft: 'auto',
       marginBottom: '2vw',
+      zIndex: 2000,
     },
     cartIcon: {
       fontSize: '8vw',
       width: '5vw',
       height: '5vh',
+      zIndex: 2000,
     },
     cartBubble: {
       position: 'absolute',
@@ -621,6 +637,7 @@ return () => {
       borderRadius: '50%',
       padding: '1vw 2vw',
       fontSize: '3vw',
+      zIndex: 2000,
     },
     cartItemsContainer: {
       display: 'flex',
@@ -696,8 +713,8 @@ return () => {
 
     heroSection: {
       backgroundColor: '#F5F5F5',
-      padding: '5vw',
-      marginBottom: '3vw',
+      padding: '1vw',
+      marginBottom: '1vw',
     },
     heroBackground: {
       backgroundImage: 'url("/path-to-eco-friendly-background.jpg")',
@@ -780,6 +797,34 @@ return () => {
       color: '#fff',
     },
 
+
+    themeSection: {
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '90vh',  // Adjust height if needed
+      overflow: 'hidden',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      zIndex: 0,
+    },
+    themeVideo: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      objectFit: 'cover',  // Ensures video covers the whole section
+    },
+    themeOverlay: {
+      position: 'relative',
+      color: 'white',
+      zIndex: 1,
+      textAlign: 'center',
+      fontSize: '4vw',
+    },
+
   
 
     carouselContainer: {
@@ -818,6 +863,12 @@ return () => {
       fontSize: '4vw',
       color: '#757575',
       marginTop: '1vh',
+    },
+
+
+    section: {
+      overflowY: 'auto',
+      flex: 1,
     },
   };
   
@@ -1174,6 +1225,22 @@ const toggleWishlist = (productId) => {
       Back to Top
     </button>
 
+    {/* New Theme Section with Autoplaying Video */}
+    {!isSearching && <div style={styles.themeSection}>
+              <video
+                style={styles.themeVideo}
+                src="https://gadupathi.s3.ap-south-1.amazonaws.com/newgreenCycle.mp4"
+                autoPlay
+                muted
+                loop
+              ></video>
+              <div style={styles.themeOverlay}>
+                <h2>Welcome to our Eco-Friendly Store</h2>
+                <p>Promoting sustainable and eco-friendly products for a better tomorrow.</p>
+              </div>
+            </div>
+            }
+
 
       <section style={styles.section}>
         {/* <div style={styles.categoriesContainer}>
@@ -1189,19 +1256,18 @@ const toggleWishlist = (productId) => {
         </div> */}
         
         
+{/* Place HomeContent below the themeSection */}
+<section style={styles.section}>
         {!isSearching && <HomeContent
-                  categories={categories}
-                  searchQuery={searchQuery}
-                  setSearchQuery={setSearchQuery}
-                  suggestions={suggestions}
-                  handleSuggestionClick={handleSuggestionClick}
-                  handleSearch={handleSearch}
-                  selectedCategory={selectedCategory}
-                  setSelectedCategory={setSelectedCategory}
-            />
-
-        }
-
+          categories={categories}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          suggestions={suggestions}
+          handleSuggestionClick={handleSuggestionClick}
+          handleSearch={handleSearch}
+          selectedCategory={selectedCategory}
+          setSelectedCategory={setSelectedCategory}
+        />}
         <div style={styles.carouselContainer}>
               <Carousel
                     responsive={{
@@ -1269,6 +1335,8 @@ const toggleWishlist = (productId) => {
 
       </section>
       <Footer navigate={navigate} />
+
+</section>
       <Modal
         isOpen={filterModalIsOpen}
         onRequestClose={() => setFilterModalIsOpen(false)}
