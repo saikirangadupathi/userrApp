@@ -32,15 +32,16 @@ const truckIconUrl = './truck.jpg';
 
 const StatusIconContainer = styled.div`
   display: flex;
-  justify-content: flex-end;
+  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  height: 100%;
+  font-size: 3vw;
   position: relative;
 `;
 
 const StatusIcon = styled.img`
-  width: 14vw;
-  height: 15vh;
+  width: 10vw;
+  height: 9vh;
   object-fit: contain;
 `;
 
@@ -362,15 +363,15 @@ const renderMapOrIcon = () => {
   if (orderInfo.status === 'completed') {
     return (
       <StatusIconContainer>
-        <p style={{marginRight:'2vw'}}>PickUp Completed</p>
         <StatusIcon src="https://gadupathi.s3.ap-south-1.amazonaws.com/order.png" alt="Order Completed" />
+        <p>PickUp Completed</p>
       </StatusIconContainer>
     );
   } else if (orderInfo.status === 'Cancelled') {
     return (
       <StatusIconContainer>
-        <p style={{marginRight:'2vw'}}>PickUp Cancelled</p>
         <StatusIcon src="https://gadupathi.s3.ap-south-1.amazonaws.com/delivery-cancelled.png" alt="Order Cancelled" />
+        <p>PickUp Cancelled</p>
       </StatusIconContainer>
     );
   } else {
