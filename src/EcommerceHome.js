@@ -38,9 +38,100 @@ const CenteredLoader = styled.div`
 `;
 
 const ContentFooterSection = styled.div`
-  padding: 4vw 0;
-  background-color: #212121;
-  color: #fff;
+  padding: 5vw 0;
+  background-color: #1c1c1c;
+  color: #ffffff;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  font-family: 'Roboto', sans-serif;
+`;
+
+const FooterColumn = styled.div`
+  flex: 1 1 30%;
+  padding: 1vw;
+  min-width: 250px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const SocialIconsContainer = styled.div`
+  display: flex;
+  justify-content: center; /* Centering the icons horizontally */
+  gap: 2vw;
+  margin-top: 2vw;
+`;
+
+const FooterTitle = styled.h3`
+  font-size: 4vw;
+  color: #f4b400; /* Vibrant yellow for highlights */
+  margin-bottom: 2vw;
+  text-transform: uppercase;
+  font-weight: bold;
+`;
+
+const FooterLink = styled.a`
+  display: block;
+  color: #ffffff;
+  font-size: 3vw;
+  margin-bottom: 1.5vw;
+  text-decoration: none;
+  transition: color 0.3s ease;
+
+  &:hover {
+    color: #f4b400;
+    text-decoration: underline;
+  }
+`;
+
+
+const SocialIcon = styled.img`
+  width: 6vw;
+  height: 6vw;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+`;
+
+const NewsletterContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-top: 2vw;
+`;
+
+const NewsletterText = styled.p`
+  font-size: 3vw;
+  margin-bottom: 2vw;
+`;
+
+const EmailInput = styled.input`
+  padding: 2vw;
+  font-size: 3vw;
+  border: none;
+  border-radius: 10px;
+  width: 80%;
+  margin-bottom: 1.5vw;
+`;
+
+const SignUpButton = styled.button`
+  background-color: #f4b400;
+  color: #1c1c1c;
+  padding: 2vw 4vw;
+  border: none;
+  border-radius: 10px;
+  font-size: 3vw;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: #e69500;
+  }
 `;
 
 const EcommerceHome = ({ previousRoute }) => {
@@ -1307,31 +1398,30 @@ const toggleWishlist = (productId) => {
           {searchResults.length > 0 ? renderProducts(searchResults) : renderProducts(getFilteredAndSortedItems())}
         </div>
         {/* Footer Section */}
-      <ContentFooterSection>
-        <div>
-          <h3>Quick Links</h3>
-          <ul>
-            <li>About Us</li>
-            <li>FAQs</li>
-            <li>Return Policy</li>
-            <li>Sustainability</li>
-            <li>Contact Us</li>
-          </ul>
-        </div>
-        <div>
-          <h3>Follow Us</h3>
-          {/* Add social media icons */}
-          <img src="facebook-icon.png" alt="Facebook" />
-          <img src="instagram-icon.png" alt="Instagram" />
-          <img src="twitter-icon.png" alt="Twitter" />
-        </div>
-        <div>
-          <h3>Newsletter</h3>
-          <p>Get 10% off your first order! Sign up for eco-friendly tips and product updates.</p>
-          <input type="email" placeholder="Your Email" />
-          <button>Sign Up</button>
-        </div>
-      </ContentFooterSection>
+            <ContentFooterSection>
+              <FooterColumn>
+                  <FooterTitle>Newsletter</FooterTitle>
+                  <NewsletterText>Get 10% off your first order! Sign up for eco-friendly tips and product updates.</NewsletterText>
+                  <EmailInput type="email" placeholder="Your Email" />
+                  <SignUpButton>Sign Up</SignUpButton>
+              </FooterColumn>
+                <FooterColumn>
+                  <FooterTitle>Quick Links</FooterTitle>
+                  <FooterLink href="#">About Us</FooterLink>
+                  <FooterLink href="#">FAQs</FooterLink>
+                  <FooterLink href="#">Return Policy</FooterLink>
+                  <FooterLink href="#">Sustainability</FooterLink>
+                  <FooterLink href="#">Contact Us</FooterLink>
+                </FooterColumn>
+                <FooterColumn>
+                  <FooterTitle>Follow Us</FooterTitle>
+                  <SocialIconsContainer>
+                    <SocialIcon src="https://gadupathi.s3.ap-south-1.amazonaws.com/facebook.png" alt="Facebook" />
+                    <SocialIcon src="https://gadupathi.s3.ap-south-1.amazonaws.com/instagram.png" alt="Instagram" />
+                    <SocialIcon src="https://gadupathi.s3.ap-south-1.amazonaws.com/twitter.png" alt="Twitter" />
+                  </SocialIconsContainer>
+                </FooterColumn>
+            </ContentFooterSection>
 
       </section>
       <Footer navigate={navigate} />
