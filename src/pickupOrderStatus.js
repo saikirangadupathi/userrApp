@@ -30,7 +30,19 @@ const truckIconUrl = './truck.jpg';
 
 
 
+const StatusIconContainer = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  height: 100%;
+  position: relative;
+`;
 
+const StatusIcon = styled.img`
+  width: 14vw;
+  height: 15vh;
+  object-fit: contain;
+`;
 
 
 const PickupOrderStatus = ({ cancelOrder }) => {
@@ -77,6 +89,10 @@ const PickupOrderStatus = ({ cancelOrder }) => {
   const [isSmallMapContainer,setIsSmallMapContainer] = useState(false);
 
 
+  const [selectedReason, setSelectedReason] = useState('');
+  const [otherReason, setOtherReason] = useState('');
+
+
   const toggleOrderExpand = () => setIsOrderExpanded(!isOrderExpanded);
 
 
@@ -99,7 +115,10 @@ const PickupOrderStatus = ({ cancelOrder }) => {
         });
         setOrderStatus(response.data.status);
         console.log('status',response.data.status);
+        console.log('location',response.data);
         const {latitude, longitude }= response.data.location;
+        
+        console.log('latitude_longitude',latitude,longitude);
         setCustomerLocation([ latitude, longitude]);
       } catch (error) {
         console.error('Error fetching order status:', error);
@@ -179,25 +198,82 @@ const PickupOrderStatus = ({ cancelOrder }) => {
     setIsConfirmModalOpen(true);
   };
 
+
+  const handleReasonChange = (event) => {
+    setSelectedReason(event.target.value);
+    if (event.target.value !== 'Other Reasons') {
+      setOtherReason(''); // Clear otherReason input if it's not selected
+    }
+  };
+  
+  const handleOtherReasonChange = (event) => {
+    setOtherReason(event.target.value);
+  };
+
+
+
+
   const confirmCancelOrder = async () => {
+    let reason = selectedReason === 'Other Reasons' ? otherReason : selectedReason;
+  
+    if (!reason) {
+      alert("Please provide a reason for cancelling the order.");
+      return;
+    }
+  
+    const cancellationLogData = {
+      orderID: orderInfo.Id,
+      sellerId: null, 
+      buyerId: orderInfo.pickupAgentId || null,
+      cancelledBy:  `Customer-${orderInfo.name}`, 
+      cancellationReason: reason,
+      orderType: 'Pickup', 
+      statusBeforeCancellation: orderInfo.status,
+      previousStatusDate: orderInfo.previousStatusDate || new Date(),
+    };
+  
+    const orderStatusUpdateData = {
+      id: orderInfo.Id,
+      status: 'Cancelled',
+    };
+  
     try {
-      await axios.delete(`https://recycle-backend-apao.onrender.com/api/order/${orderInfo.Id}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-      });
+      const cancellationLogResponse = await axios.post(
+        'https://recycle-backend-apao.onrender.com/api/cancellations',
+        cancellationLogData,
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        }
+      );
+  
+      console.log('Cancellation Log Created:', cancellationLogResponse.data);
+  
+      // Step 2: Update the order status to 'Cancelled'
+      const orderStatusResponse = await axios.post(
+        'https://recycle-backend-apao.onrender.com/api/scrap-orders/update-status',
+        orderStatusUpdateData,
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        }
+      );
+  
+      console.log('Order Status Updated:', orderStatusResponse.data);
+  
+      // Proceed with UI changes or animations
       cancelOrder(orderInfo.Id);
       setIsConfirmModalOpen(false);
       setShowAnimation(true); // Show the animation
-
+  
       setTimeout(() => {
         setShowAnimation(false); // Hide the animation after 4 seconds
         navigate('/pickup-list');
       }, 4000);
     } catch (error) {
-      console.error('Error deleting order:', error);
+      console.error('Error processing cancellation:', error);
       alert('Failed to cancel the order. Please try again.');
     }
   };
-
+  
   const handleTrackOrderClick = () => {
     setIsModalOpen(true);
   };
@@ -282,55 +358,79 @@ const truckIcon = new L.Icon({
 });
 
 
-const MapContainer = () => (
-  <LargeMapContainer ref={mapContainerRef} expanded={isMapExpanded}>
-    <Map
-      ref={mapRef}
-      initialViewState={{
-        latitude: customerLocation[0],
-        longitude: customerLocation[1],
-        zoom: isMapExpanded ? 13 : 14,
-      }}
-      style={{ width: '100%', height: '100%' }}
-      mapStyle="mapbox://styles/mapbox/light-v11"
-      mapboxAccessToken={mapboxAccessToken}
-      onLoad={handleMapLoad} // Add onLoad here
-    >
-      {/* Customer Marker */}
-      <Marker latitude={customerLocation[0]} longitude={customerLocation[1]} color="#5D3FD3" />
-
-      {/* Agent Location Marker */}
-      {agentLocation && (
-        <Marker latitude={agentLocation[0]} longitude={agentLocation[1]}>
-          <div
-            style={{
-              backgroundImage: `url(${truckIconUrl})`,
-              width: '32px',
-              height: '32px',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
+const renderMapOrIcon = () => {
+  if (orderInfo.status === 'completed') {
+    return (
+      <StatusIconContainer>
+        <p style={{marginRight:'2vw'}}>PickUp Completed</p>
+        <StatusIcon src="https://gadupathi.s3.ap-south-1.amazonaws.com/order.png" alt="Order Completed" />
+      </StatusIconContainer>
+    );
+  } else if (orderInfo.status === 'Cancelled') {
+    return (
+      <StatusIconContainer>
+        <p style={{marginRight:'2vw'}}>PickUp Cancelled</p>
+        <StatusIcon src="https://gadupathi.s3.ap-south-1.amazonaws.com/delivery-cancelled.png" alt="Order Cancelled" />
+      </StatusIconContainer>
+    );
+  } else {
+    return (
+      <div>
+        {/* Only show ExpandButton when the Map is visible */}
+        {!isMapExpanded && (
+          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <ExpandButton onClick={toggleMapExpand}>
+              <ArrowsFullscreen size={18} />
+            </ExpandButton>
+          </div>
+        )}
+        <LargeMapContainer ref={mapContainerRef} expanded={isMapExpanded}>
+          <Map
+            ref={mapRef}
+            initialViewState={{
+              latitude: customerLocation[0],
+              longitude: customerLocation[1],
+              zoom: isMapExpanded ? 13 : 14,
             }}
-          />
-        </Marker>
-      )}
-
-      {/* Route Layer */}
-      {routeData && (
-        <Source id="route" type="geojson" data={routeData}>
-          <Layer
-            id="route"
-            type="line"
-            layout={{ 'line-join': 'round', 'line-cap': 'round' }}
-            paint={{ 'line-color': '#888', 'line-width': 6 }}
-          />
-        </Source>
-      )}
-    </Map>
-
-    {isMapExpanded && <CloseButton onClick={toggleMapExpand}>Close</CloseButton>}
-  </LargeMapContainer>
-);
-
+            style={{ width: '100%', height: '100%', zIndex: -100 }}
+            mapStyle="mapbox://styles/mapbox/light-v11"
+            mapboxAccessToken={mapboxAccessToken}
+            onLoad={handleMapLoad} // Add onLoad here
+          >
+            {/* Customer Marker */}
+            <Marker latitude={customerLocation[0]} longitude={customerLocation[1]} color="#5D3FD3" />
+            {/* Agent Location Marker */}
+            {agentLocation && (
+              <Marker latitude={agentLocation[0]} longitude={agentLocation[1]}>
+                <div
+                  style={{
+                    backgroundImage: `url(${truckIconUrl})`,
+                    width: '32px',
+                    height: '32px',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                  }}
+                />
+              </Marker>
+            )}
+            {/* Route Layer */}
+            {routeData && (
+              <Source id="route" type="geojson" data={routeData}>
+                <Layer
+                  id="route"
+                  type="line"
+                  layout={{ 'line-join': 'round', 'line-cap': 'round' }}
+                  paint={{ 'line-color': '#888', 'line-width': 6 }}
+                />
+              </Source>
+            )}
+          </Map>
+          {isMapExpanded && <CloseButton onClick={toggleMapExpand}>Close</CloseButton>}
+        </LargeMapContainer>
+      </div>
+    );
+  }
+};
   
 
   return (
@@ -357,15 +457,14 @@ const MapContainer = () => (
 
             {isMapExpanded && (
               <div>
-                  {<MapContainer expanded={isMapExpanded} />}
+                    {renderMapOrIcon()}
               </div>
             )}
 
           <StyledCard>
-          <Card.Header>
-            {/* Conditionally render based on the presence of pickupAgent */}
-            {pickupAgent ? (
-              <>
+              <Card.Header>
+              {pickupAgent ? (
+                <>
                   <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                     <ProfileImage
                       src={pickupAgent?.profileImage || 'default-profile.png'}
@@ -377,11 +476,8 @@ const MapContainer = () => (
                     {!isMapExpanded && (
                           <div style={{ marginLeft: '20vw', marginRight: '0' }}>
                             <div style={{ display: 'flex', justifyContent: 'flex-end'}}>
-                              <ExpandButton onClick={toggleMapExpand}>
-                                <ArrowsFullscreen size={18} />
-                              </ExpandButton>
+                                {renderMapOrIcon()}
                             </div>
-                              <MapContainer expanded={isMapExpanded} />
                           </div>
                       )}                                                                                                                                                                                            
                   </div>
@@ -444,8 +540,6 @@ const MapContainer = () => (
           </PickupInstructionsContainer>
 
 
-          
-              {/* Updated OrderDetails */}
       <StyledCard>
         <Card.Header>
           <div style={{display:'flex',flexDirection:'row',alignItems: 'center', width: '100%' }}>
@@ -509,35 +603,132 @@ const MapContainer = () => (
         <ModalOption onClick={handleCancelOrder}>Cancel Order</ModalOption>
       </SupportModalContainer>
       
-      <Modal
-        isOpen={isConfirmModalOpen}
-        onRequestClose={handleCloseConfirmModal}
-        contentLabel="Confirm Cancel Order"
-        style={{
-          overlay: {
-            backgroundColor: 'rgba(0, 0, 0, 0.75)',
-          },
-          content: {
-            top: '50%',
-            left: '50%',
-            right: 'auto',
-            bottom: 'auto',
-            transform: 'translate(-50%, -50%)',
-            width: '50%',
-            padding: '10px',
-            borderRadius: '12px',
-            boxShadow: '0 10px 30px rgba(0, 0, 0, 0.2)',
-            backgroundColor: '#f9f9f9',
-            border: 'none',
-          },
-        }}
-      >
-        <ConfirmText>Are you sure you want to cancel this order?</ConfirmText>
-        <ButtonContainer>
-          <ConfirmButton onClick={confirmCancelOrder}>Yes</ConfirmButton>
-          <CancelButton onClick={handleCloseConfirmModal}>No</CancelButton>
-        </ButtonContainer>
-      </Modal>
+            <Modal
+                isOpen={isConfirmModalOpen}
+                onRequestClose={handleCloseConfirmModal}
+                contentLabel="Confirm Cancel Order"
+                style={{
+                  overlay: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+                  },
+                  content: {
+                    zIndex: 3500,
+                    top: '50%',
+                    left: '50%',
+                    right: 'auto',
+                    bottom: 'auto',
+                    transform: 'translate(-50%, -50%)',
+                    width: '90vw', // Adjusted to look cleaner on smaller screens
+                    maxWidth: '600px', // Added maxWidth to prevent it from being too large on wide screens
+                    padding: '2rem', // More padding for a clean look
+                    borderRadius: '16px',
+                    boxShadow: '0 10px 40px rgba(0, 0, 0, 0.2)',
+                    backgroundColor: '#fff',
+                    border: 'none',
+                    fontFamily: "'Poppins', sans-serif", // Cleaner and modern font family
+                  },
+                }}
+              >
+
+                    <SectionHeadermodal>Please share the reason for order cancellation:</SectionHeadermodal>
+                    <ReasonContainer>
+                      <StyledLabel>
+                        <StyledRadio
+                          type="radio"
+                          value="Change of Mind"
+                          checked={selectedReason === 'Change of Mind'}
+                          onChange={handleReasonChange}
+                        />
+                        Change of Mind
+                      </StyledLabel>
+                    <StyledLabel>
+                      <StyledRadio
+                        type="radio"
+                        value="Pricing Disagreement"
+                        checked={selectedReason === 'Pricing Disagreement'}
+                        onChange={handleReasonChange}
+                      />
+                      Pricing Disagreement
+                    </StyledLabel>
+                    <StyledLabel>
+                      <StyledRadio
+                        type="radio"
+                        value="Delay in Pickup"
+                        checked={selectedReason === 'Delay in Pickup'}
+                        onChange={handleReasonChange}
+                      />
+                      Delay in Pickup
+                    </StyledLabel>
+                    <StyledLabel>
+                      <StyledRadio
+                        type="radio"
+                        value="Unavailability of My Presence on Pickup Time"
+                        checked={selectedReason === 'Unavailability of My Presence on Pickup Time'}
+                        onChange={handleReasonChange}
+                      />
+                      Unavailability of My Presence on Pickup Time
+                    </StyledLabel>
+                    <StyledLabel>
+                      <StyledRadio
+                        type="radio"
+                        value="Item Not Ready or Lost"
+                        checked={selectedReason === 'Item Not Ready or Lost'}
+                        onChange={handleReasonChange}
+                      />
+                      Item Not Ready or Lost
+                    </StyledLabel>
+                    <StyledLabel>
+                      <StyledRadio
+                        type="radio"
+                        value="Incorrect or Misleading Information Provided"
+                        checked={selectedReason === 'Incorrect or Misleading Information Provided'}
+                        onChange={handleReasonChange}
+                      />
+                      Incorrect or Misleading Information Provided
+                    </StyledLabel>
+                    <StyledLabel>
+                      <StyledRadio
+                        type="radio"
+                        value="Better Offer from Another Buyer"
+                        checked={selectedReason === 'Better Offer from Another Buyer'}
+                        onChange={handleReasonChange}
+                      />
+                      Better Offer from Another Buyer
+                    </StyledLabel>
+                    <StyledLabel>
+                      <StyledRadio
+                        type="radio"
+                        value="Environmental or Personal Ethics"
+                        checked={selectedReason === 'Environmental or Personal Ethics'}
+                        onChange={handleReasonChange}
+                      />
+                      Environmental or Personal Ethics
+                    </StyledLabel>
+                    <StyledLabel>
+                      <StyledRadio
+                        type="radio"
+                        value="Other Reasons"
+                        checked={selectedReason === 'Other Reasons'}
+                        onChange={handleReasonChange}
+                      />
+                      Other Reasons
+                    </StyledLabel>
+
+                    {selectedReason === 'Other Reasons' && (
+                      <TextArea
+                        placeholder="Please describe your reason"
+                        value={otherReason}
+                        onChange={handleOtherReasonChange}
+                      />
+                    )}
+                  </ReasonContainer>
+
+                <ButtonContainer>
+                  <ConfirmButton onClick={confirmCancelOrder}>Confirm</ConfirmButton>
+                  <CancelButton onClick={handleCloseConfirmModal}>Cancel</CancelButton>
+                </ButtonContainer>
+              </Modal>
+
     </Container>
   );
 };
@@ -596,17 +787,6 @@ const SupportIcon = styled.img`
   }
 `;
 
-const SupportModalContainer = styled(Modal)`
-  position: absolute;
-  top: 7vh;
-  right: 2vw;
-  background-color: white;
-  border-radius: 2vw;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-  padding: 3vh;
-  width: 35vw;
-  z-index: 1000;
-`;
 
 const ModalOption = styled.div`
   padding: 2vh;
@@ -769,15 +949,49 @@ const AgentInfo = styled.div`
 
 
 const LargeMapContainer = styled.div`
-    position: relative;
-    width: ${({ expanded }) => expanded ? '80vw' : '90px'};
-    height: ${({ expanded }) => expanded ? '60vh' : '10vh'};
-    margin: ${({ expanded }) => expanded ? '0 auto' : '0'};
-    border-radius: 15px;
-    transition: all 0.3s ease;
-    z-index: ${({ expanded }) => expanded ? 500 : 1};
-    overflow: hidden;
+  position: relative;
+  width: ${({ expanded }) => expanded ? '80vw' : '90px'};
+  height: ${({ expanded }) => expanded ? '60vh' : '10vh'};
+  margin: ${({ expanded }) => expanded ? '0 auto' : '0'};
+  border-radius: 15px;
+  transition: all 0.3s ease;
+  z-index: ${({ expanded }) => expanded ? 1 : 0}; /* Adjust z-index for map */
+  overflow: hidden;
 `;
+
+const MapContainer = styled.div`
+  z-index: 1;
+`;
+
+
+
+const SupportModalContainer = styled(Modal)`
+  position: absolute;
+  top: 7vh;
+  right: 2vw;
+  background-color: white;
+  border-radius: 2vw;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  padding: 3vh;
+  width: 35vw;
+  z-index: 3000; /* Set high z-index for modal */
+`;
+
+const ModalContainer = styled(Modal)`
+  z-index: 3500; /* Ensure the cancel order modal is above the map and support modal */
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100vw;
+  padding: 2vw;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  background-color: #f9f9f9;
+  border: none;
+`;
+
+
 const CloseButton = styled.button`
     position: absolute;
     top: 3vh;
@@ -798,6 +1012,125 @@ const CloseButton = styled.button`
         font-size: 4vw;
     }
 `;
+
+
+const SectionHeadermodal = styled.h3`
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+  text-align: center;
+  margin-bottom: 1rem;
+`;
+
+const ReasonContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+`;
+
+const StyledLabel = styled.label`
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #e0ffe5;
+  }
+`;
+
+const StyledRadio = styled.input`
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #76c7c0;
+  border-radius: 50%;
+  margin-right: 12px;
+  transition: background-color 0.3s ease;
+
+  &:checked {
+    background-color: #76c7c0;
+    border-color: #76c7c0;
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 5px rgba(118, 199, 192, 0.6);
+  }
+`;
+
+const TextArea = styled.textarea`
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  margin-top: 12px;
+  font-size: 16px;
+  transition: border-color 0.3s ease;
+
+  &:focus {
+    border-color: #76c7c0;
+    outline: none;
+    box-shadow: 0 0 5px rgba(118, 199, 192, 0.6);
+  }
+`;
+
+const ButtonContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+`;
+
+const ConfirmButton = styled.button`
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: #45a049;
+  }
+
+  &:active {
+    background-color: #3e8e41;
+  }
+`;
+
+const CancelButton = styled.button`
+  background-color: grey;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: #e53935;
+  }
+
+  &:active {
+    background-color: #d32f2f;
+  }
+`;
+
+const ConfirmText = styled.p`
+  font-size: 18px;
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+  font-weight: bold;
+`;
+
 
 const Detail = styled.p`
   font-size: 16px;
@@ -969,60 +1302,6 @@ const FooterButton = styled.button`
   }
 `;
 
-
-
-const ConfirmText = styled.p`
-  font-size: 3.5vw;
-  text-align: center;
-  margin-bottom: 2vh;
-  color: #333;
-`;
-
-const ButtonContainer = styled.div`
-  display: flex;
-  justify-content: space-around;
-  margin-top: 2vh;
-`;
-
-const ConfirmButton = styled.button`
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  border-radius: 2vw;
-  padding: 2vh 1vw;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-  box-shadow: 0 1vh 3vh rgba(0, 0, 0, 0.1);
-
-  &:hover {
-    background-color: #45a049;
-    transform: translateY(-1vh);
-  }
-
-  &:active {
-    transform: translateY(0);
-  }
-`;
-
-const CancelButton = styled.button`
-  background-color: #f44336;
-  color: white;
-  border: none;
-  border-radius: 2vw;
-  padding: 2vh 1vw;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-  box-shadow: 0 1vh 3vh rgba(0, 0, 0, 0.1);
-
-  &:hover {
-    background-color: #e53935;
-    transform: translateY(-1vh);
-  }
-
-  &:active {
-    transform: translateY(0);
-  }
-`;
 
 const FullScreenAnimation = styled.div`
   position: fixed;
