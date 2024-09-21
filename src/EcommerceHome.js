@@ -27,6 +27,8 @@ import HomeContent from './homeContent.js';
 import wishlistActive from './wishlistActive.png';
 
 import wishlistNonActive from './wishlistNonActive.png';
+
+import SegmentDropdown from './segmentsDropdown.js'
  
 Modal.setAppElement('#root');
 
@@ -133,6 +135,52 @@ const SignUpButton = styled.button`
     background-color: #e69500;
   }
 `;
+
+
+
+const CategoryGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);  // 6 columns per row
+  grid-template-rows: auto;  // Allow rows to expand based on content
+  gap: 3vw;
+  overflow-x: auto;  // Enable horizontal scrolling
+  margin: 2vh;
+  white-space: nowrap;
+  scroll-snap-type: x mandatory;  // Smooth horizontal scrolling
+`;
+
+const CategoryItem = styled.div`
+  background-image: url(${(props) => props.$bgImage});
+  background-size: cover;
+  background-position: center;
+  min-width: 45vw;
+  height: 15vh;
+  padding: 2vw;
+  margin: 2vw;
+  text-align: center;
+  font-size: 2vw;
+  border-radius: 10px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: ${(props) => (props.active ? '2px solid #4CAF50' : '2px solid transparent')};
+  opacity: ${(props) => (props.active ? 0.9 : 1)};
+
+  &:hover {
+    background-color: rgba(54, 69, 79, 0.8);
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+
+  & > span {
+    font-size: ${(props) => (props.active ? '3.5vw' : '3vw')};
+    font-weight: ${(props) => (props.active ? 'bold' : 'normal')};
+    color: ${(props) => (props.active ? '#333333' : '#4A4A4A')};
+  }
+`;
+
+
+
 
 const EcommerceHome = ({ previousRoute }) => {
   const navigate = useNavigate();
@@ -955,12 +1003,11 @@ return () => {
       color: '#757575',
       marginTop: '1vh',
     },
-
-
     section: {
       overflowY: 'auto',
       flex: 1,
     },
+    
   };
   
 
@@ -1346,9 +1393,63 @@ const toggleWishlist = (productId) => {
           ))}
         </div> */}
         
-        
-{/* Place HomeContent below the themeSection */}
-<section style={styles.section}>
+
+    <section style={styles.section}>
+
+      <SegmentDropdown />
+      <div>
+        <h4>Are You Looking For ?</h4>
+          <CategoryGrid>
+                {[
+                  'Daily Essentials & Personal Care',
+                  'Sustainable Fashion',
+                  'Home and Kitchen Products',
+                  'Reusable & Zero-Waste Products',
+                  'Eco-Friendly Electronics & Accessories',
+                  'Organic and Sustainable Food Products',
+                  'Eco-Friendly Packaging',
+                  'Cultural Products & Artifacts',
+                  'Regional Eco-Friendly Specialties',
+                  'Upcycled and Recycled Products',
+                ].map((category, index) => {
+                  const categoryImages = [
+                    'https://gadupathi.s3.ap-south-1.amazonaws.com/daily+essentials+and+personal+care+products.webp',
+                    'https://gadupathi.s3.ap-south-1.amazonaws.com/eco-friendly+outfits+made+from+natural+and+recycled+materials.webp',
+                    'https://gadupathi.s3.ap-south-1.amazonaws.com/essential+home+and+kitchen+items.webp',
+                    'https://gadupathi.s3.ap-south-1.amazonaws.com/reusable+and+zero-waste+products.webp',
+                    'https://gadupathi.s3.ap-south-1.amazonaws.com/eco-friendly+tech+accessories+and+gadgets.webp',
+                    'https://gadupathi.s3.ap-south-1.amazonaws.com/Sustainable+Food+%26+Grocery.webp',
+                    'https://gadupathi.s3.ap-south-1.amazonaws.com/eco-friendly+packaging+and+sustainable+stationery.webp',
+                    'https://gadupathi.s3.ap-south-1.amazonaws.com/culturalArtifacts.webp',
+                    'https://gadupathi.s3.ap-south-1.amazonaws.com/regionalArtifacts.webp',
+                    'https://gadupathi.s3.ap-south-1.amazonaws.com/UpcycledAndRecycledProducts.webp',
+                  ];
+
+                  return (
+                    <CategoryItem
+                      key={index}
+                      active={selectedCategory === category}
+                      onClick={() => setSelectedCategory(category)}
+                      $bgImage={categoryImages[index]}  // Dynamically assign the image URL
+                    >
+                      <span style={{ 
+                          backgroundColor: 'rgba(245, 245, 245, 0.9)',
+                          padding: '1.5vw', 
+                          borderRadius: '10px', 
+                          maxWidth: '30vw', 
+                          whiteSpace: 'normal',
+                          overflowWrap: 'break-word',
+                          textAlign: 'center',
+                          display: 'inline-block'
+                        }}>
+                        {category}
+                      </span>
+                    </CategoryItem>
+                  );
+                })}
+              </CategoryGrid>
+            </div>
+
         {!isSearching && <HomeContent
           categories={categories}
           searchQuery={searchQuery}
