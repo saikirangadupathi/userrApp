@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faIndianRupeeSign, faStore, faRecycle } from '@fortawesome/free-solid-svg-icons';
 
+import ShopIcon from './shop.png';
+
 const SellBuyPage = () => {
   const navigate = useNavigate();
 
@@ -22,13 +24,13 @@ const SellBuyPage = () => {
         <Logo>Green Cycle</Logo>
       </LogoContainer>
       <ButtonContainer>
+        <StyledButton onClick={handleBuyClick} color="white">
+            <ImageIcon src={ShopIcon} alt="Buy Icon" /> {/* Use ImageIcon instead of IconBuy */}
+            <ButtonText>Buy</ButtonText>
+        </StyledButton>
         <StyledButton onClick={handleSellClick} color="white">
           <IconSell icon={faIndianRupeeSign} />
           <ButtonText>Sell</ButtonText>
-        </StyledButton>
-        <StyledButton onClick={handleBuyClick} color="white">
-          <IconBuy icon={faStore} />
-          <ButtonText>Buy</ButtonText>
         </StyledButton>
       </ButtonContainer>
     </Container>
@@ -44,6 +46,15 @@ const Container = styled.div`
   justify-content: center;
   height: 100vh;
   background-color: #b29dfa;
+`;
+
+
+const ImageIcon = styled.img`
+  width: 17vw;
+  height: 18vw;
+  margin-top: 2vh;
+  margin-bottom: 1vh;
+  z-index: 1;
 `;
 
 const LogoContainer = styled.div`
@@ -162,7 +173,7 @@ const Icon = styled(FontAwesomeIcon)`
 `;
 
 const IconSell = styled(FontAwesomeIcon)`
-  color: ${(props) => props.color || '#B1F7A6'};
+  color: ${(props) => props.color || '#f3c70d'};
   margin-top: 2vh;
   margin-bottom: 1vh;
   font-size: 12vw;
